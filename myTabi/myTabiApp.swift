@@ -8,42 +8,30 @@
 import SwiftUI
 import FirebaseCore
 
+class AppDelegate: NSObject, UIApplicationDelegate {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    FirebaseApp.configure()
+    return true
+  }
+}
+
 @main
 struct myTabiApp: App {
-    init() {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    /*init() {
             FirebaseApp.configure()
-        }
+        }*/
+    
+    let appDependency = AppDependency.shared
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            /*ContentView(
+                tripVM: TripVM(tripService: appDependency.tripService),
+                driverVM: DriverVM(driverService: appDependency.driverService)
+            )*/
+            ContentView(appDependency: appDependency)
         }
     }
 }
-
-/*
- import SwiftUI
- import FirebaseCore
-
- class AppDelegate: NSObject, UIApplicationDelegate {
-   func application(_ application: UIApplication,
-                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-     FirebaseApp.configure()
-     return true
-   }
- }
-
- @main
- struct YourApp: App {
-   // register app delegate for Firebase setup
-   @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-
-   var body: some Scene {
-     WindowGroup {
-       NavigationView {
-         ContentView()
-       }
-     }
-   }
- }
- */

@@ -8,18 +8,43 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var viewModel = TripVM()
+    @StateObject var tripVM: TripVM
+    @StateObject var driverVM: DriverVM
+    
+    init(appDependency: AppDependency) {
+        _tripVM = StateObject(wrappedValue: TripVM(tripService: appDependency.tripService))
+        _driverVM = StateObject(wrappedValue: DriverVM(driverService: appDependency.driverService))
+    }
     
     var body: some View {
-        NavigationView {
-            List(viewModel.trips) { trip in
-                Text("\(trip.startLocation) to \(trip.endLocation)")
-            }
-            .navigationTitle("Trips")
+        TabView {
+            SummaryView()
+                .environmentObject(tripVM)
+                .tabItem {
+                    Label("Summary", systemImage: "chart.pie.fill")
+                }
+            
+            TripsView()
+                .environmentObject(tripVM)
+                .tabItem {
+                    Label("Trips", systemImage: "map")
+                }
+            
+            ExpensesView()
+                .tabItem {
+                    Label("Expenses", systemImage: "creditcard")
+                }
+            
+            DriversView()
+                .tabItem {
+                    Label("Drives", systemImage: "person.2")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.blue, .indigo)
+                }
         }
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(appDependency: AppDependency.shared)
 }

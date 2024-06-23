@@ -9,7 +9,12 @@ import Foundation
 import SwiftCSV
 
 class CSVParser {
-    func parseTrips(from csvString: String) -> [Trip] {
+    func parseTrips(fileUrl: URL) -> [Trip] {
+        guard fileUrl.startAccessingSecurityScopedResource() else {
+            print("Error accessing file")
+            return []
+        }
+        
         var trips: [Trip] = []
         let startLocationColumn = 0 //preparation for universal CSVs
         let endLocationColumn = 2
@@ -18,8 +23,8 @@ class CSVParser {
         let distanceColumn = 4
         
         do {
-            let csvFile: CSV = try CSV<Enumerated>(url: URL(fileURLWithPath: "path/to/users.csv"), delimiter: .semicolon)
-            
+            let csvFile: CSV = try CSV<Enumerated>(url: fileUrl, delimiter: .semicolon)
+
             for row in csvFile.rows {
                 let startLocation = row[startLocationColumn]
                 let endLocation = row[endLocationColumn]
@@ -34,10 +39,10 @@ class CSVParser {
         } catch let parseError as CSVParseError {
             switch parseError {
             case .generic(let message), .quotation(let message):
-                print(message)
+                print("Error parsing CSV: " + message)
             }
         } catch {
-            print("Error while reading trips from CSV file")
+            print("Error reading trips from CSV file: " + error.localizedDescription)
         }
         return trips
     }
