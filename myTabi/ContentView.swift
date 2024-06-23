@@ -8,14 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject var viewModel = TripVM()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationView {
+            List(viewModel.trips) { trip in
+                Text("\(trip.startLocation) to \(trip.endLocation)")
+            }
+            .navigationTitle("Trips")
         }
-        .padding()
     }
 }
 
