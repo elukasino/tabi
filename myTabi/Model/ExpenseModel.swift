@@ -11,5 +11,15 @@ struct Expense: Hashable, Identifiable, Codable {
     var id: String = UUID().uuidString
     var description: String?
     var amount: Double
-    var type: String
+    var type: ExpenseType
+}
+
+enum ExpenseType: String, Codable, CaseIterable, Identifiable {
+    case fuel = "Fuel"
+    case service = "Service"
+    case tires = "Tires"
+    case accessories = "Accessories"
+    case other = "Other"
+    
+    var id: String { self.rawValue } //TODO: What is this?
 }

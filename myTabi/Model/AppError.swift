@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum AppError: Error, Identifiable {
+enum AppError: LocalizedError, Identifiable {
     var id: String { UUID().uuidString }
     
     case runtimeError(description: String)
@@ -16,7 +16,8 @@ enum AppError: Error, Identifiable {
     var errorDescription: String? {
             switch self {
             case .csvFileError(let description):
-                return "CSV file error: \(description)"
+                //return "CSV file error: \(description)"
+                return description
             case .runtimeError(let description):
                 return "Unknown error: \(description)"
             }

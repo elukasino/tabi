@@ -9,42 +9,57 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject var tripVM: TripVM
+    @StateObject var expenseVM: ExpenseVM
     @StateObject var driverVM: DriverVM
+    @StateObject var authVM: AuthVM
     
     init(appDependency: AppDependency) {
         _tripVM = StateObject(wrappedValue: TripVM(tripService: appDependency.tripService))
+        _expenseVM = StateObject(wrappedValue: ExpenseVM(expenseService: appDependency.expenseService))
         _driverVM = StateObject(wrappedValue: DriverVM(driverService: appDependency.driverService))
+        _authVM = StateObject(wrappedValue: appDependency.authVM)
     }
     
     var body: some View {
-        TabView {
-            SummaryView()
-                .environmentObject(tripVM)
-                .tabItem {
-                    Label("Summary", systemImage: "chart.pie.fill")
-                }
-            
-            TripsView()
-                .environmentObject(tripVM)
-                .tabItem {
-                    Label("Trips", systemImage: "map")
-                }
-            
-            ExpensesView()
-                .tabItem {
-                    Label("Expenses", systemImage: "creditcard")
-                }
-            
-            DriversView()
-                .tabItem {
-                    Label("Drives", systemImage: "person.2")
-                        .symbolRenderingMode(.palette)
-                        .foregroundStyle(.blue, .indigo)
-                }
+        if authVM.user != nil {
+            TabView {
+                SummaryView()
+                    .environmentObject(tripVM)
+                    .environmentObject(expenseVM)
+                    .environmentObject(driverVM)
+                    .tabItem {
+                        Label("Summary", systemImage: "chart.pie.fill")
+                    }
+                
+                TripsView()
+                    .environmentObject(tripVM)
+                    .environmentObject(driverVM)
+                    .tabItem {
+                        Label("Trips", systemImage: "map")
+                    }
+                
+                ExpensesView()
+                    .environmentObject(expenseVM)
+                    .tabItem {
+                        Label("Expenses", systemImage: "creditcard")
+                    }
+                
+                DriversView()
+                    .environmentObject(driverVM)
+                    .tabItem {
+                        Label("Drives", systemImage: "person.2")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.blue, .indigo)
+                    }
+            }
+        }
+        else {
+            AuthView()
+                .environmentObject(authVM)
         }
     }
 }
 
 #Preview {
-    ContentView(appDependency: AppDependency.shared)
+    ContentView(appDependency: AppDependency())
 }

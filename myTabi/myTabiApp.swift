@@ -18,20 +18,17 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct myTabiApp: App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    /*init() {
-            FirebaseApp.configure()
-        }*/
+    //@UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    init() {
+        FirebaseApp.configure()
+    }
     
-    let appDependency = AppDependency.shared
+    //let appDependency = AppDependency.shared
     
     var body: some Scene {
         WindowGroup {
-            /*ContentView(
-                tripVM: TripVM(tripService: appDependency.tripService),
-                driverVM: DriverVM(driverService: appDependency.driverService)
-            )*/
-            ContentView(appDependency: appDependency)
+            //ContentView(appDependency: appDependency)
+            ContentView(appDependency: AppDependency())
         }
     }
 }

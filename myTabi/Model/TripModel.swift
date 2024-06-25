@@ -14,5 +14,5 @@ struct Trip: Hashable, Identifiable, Codable {
     var startLocation: String
     var endLocation: String
     var distance: Double
-    var driverID: String?
+    var driverId: String?
 }

@@ -9,10 +9,9 @@ import Foundation
 import SwiftCSV
 
 class CSVParser {
-    func parseTrips(fileUrl: URL) -> [Trip] {
+    func parseTrips(fileUrl: URL) throws -> [Trip] {
         guard fileUrl.startAccessingSecurityScopedResource() else {
-            print("Error accessing file")
-            return []
+            throw AppError.csvFileError(description: "Unable to access file")
         }
         
         var trips: [Trip] = []
@@ -39,10 +38,10 @@ class CSVParser {
         } catch let parseError as CSVParseError {
             switch parseError {
             case .generic(let message), .quotation(let message):
-                print("Error parsing CSV: " + message)
+                throw AppError.csvFileError(description: "Error parsing CSV: " + message)
             }
         } catch {
-            print("Error reading trips from CSV file: " + error.localizedDescription)
+            throw AppError.csvFileError(description: "Error reading trips from CSV file: " + error.localizedDescription)
         }
         return trips
     }
