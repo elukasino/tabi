@@ -24,7 +24,7 @@ struct DriversView: View {
                 .swipeActions {
                     Button("Delete", role: .destructive) {
                         Task {
-                            /*await*/ driverVM.removeDriver(by: driver.id)
+                            await driverVM.deleteDriver(by: driver.id)
                         }
                     }
                 }
@@ -45,26 +45,30 @@ struct DriversView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        confirmationDialogPresented = true
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .confirmationDialog("Do you want to delete all drivers?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
-                        Button("Delete", role: .destructive) {
-                            Task {
-                                /*await*/ driverVM.removeAllDrivers()
-                            }
+                    if driverVM.isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    } else {
+                        Button {
+                            confirmationDialogPresented = true
+                        } label: {
+                            Image(systemName: "trash")
                         }
-                        Button("Cancel", role: .cancel) {}
+                        .confirmationDialog("Do you want to delete all drivers?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
+                            Button("Delete", role: .destructive) {
+                                Task {
+                                    await driverVM.deleteAllDrivers()
+                                }
+                            }
+                            Button("Cancel", role: .cancel) {}
+                        }
                     }
-                    
                 }
             }
             .navigationTitle("Drivers")
             .refreshable {
                 Task {
-                    //await driverVM.fetchDrivers()
+                    await driverVM.fetchAllDrivers()
                 }
             }
             .alert(isPresented: $driverVM.errorOccurred) {
@@ -82,25 +86,36 @@ struct AddDriverView: View {
     @State var driverLastName: String = ""
     
     var body: some View {
-        VStack {
+        NavigationStack {
             Form {
-                TextField("First name", text: $driverFirstName)
-                TextField("Last name", text: $driverLastName)
+                Section {
+                    TextField("First name", text: $driverFirstName)
+                    TextField("Last name", text: $driverLastName)
+                }
             }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    Task {
-                        /*await*/ driverVM.addDriver(firstName: driverFirstName, lastName: driverFirstName)
-                        dismiss()
+                if driverVM.isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .onDisappear {
+                            if !driverVM.errorOccurred {
+                                dismiss()
+                            }
+                        }
+                } else {
+                    Button {
+                        Task {
+                            await driverVM.createDriver(firstName: driverFirstName, lastName: driverFirstName)
+                        }
+                    } label: {
+                        Text("Save")
+                            .fontWeight(.bold)
                     }
-                } label: {
-                    Text("Save")
-                        .fontWeight(.bold)
+                    .disabled(driverFirstName.isEmpty)
+                    .disabled(driverLastName.isEmpty)
                 }
-                .disabled(driverFirstName.isEmpty)
-                .disabled(driverLastName.isEmpty)
             }
         }
         .toolbar {
@@ -133,14 +148,25 @@ struct EditDriverView: View {
                         TextField("Last name", text: $driver.lastName)
                     }
                     Section {
-                        Button("Delete driver", role: .destructive) {
+                        Button(role: .destructive, action: {
                             confirmationDialogPresented = true
-                        }
+                        }, label: {
+                            if driverVM.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                    .onDisappear {
+                                        if !driverVM.errorOccurred {
+                                            dismiss()
+                                        }
+                                    }
+                            } else {
+                                Text("Delete driver")
+                            }
+                        })
                         .confirmationDialog("Do you want to delete this driver?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
                             Button("Delete", role: .destructive) {
                                 Task {
-                                    /*await*/ driverVM.removeDriver(by: driver.id)
-                                    dismiss()
+                                    await driverVM.deleteDriver(by: driver.id)
                                 }
                             }
                             Button("Cancel", role: .cancel) {}
@@ -150,21 +176,29 @@ struct EditDriverView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        Task {
-                            /*await*/ driverVM.updateDriver(driver)
-                            dismiss()
+                    if driverVM.isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .onDisappear {
+                                if !driverVM.errorOccurred {
+                                    dismiss()
+                                }
+                            }
+                    } else {
+                        Button {
+                            Task {
+                                await driverVM.updateDriver(driver)
+                            }
+                        } label: {
+                            Text("Save")
+                                .fontWeight(.bold)
                         }
-                    } label: {
-                        Text("Save")
-                            .fontWeight(.bold)
+                        .disabled(driver.firstName.isEmpty)
+                        .disabled(driver.lastName.isEmpty)
                     }
-                    .disabled(driver.firstName.isEmpty)
-                    .disabled(driver.lastName.isEmpty)
-                    
                 }
             }
-            .navigationTitle(driver.firstName)
+            .navigationTitle("Edit driver")
         }
     }
 }

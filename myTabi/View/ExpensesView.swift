@@ -24,7 +24,7 @@ struct ExpensesView: View {
                 .swipeActions {
                     Button("Delete", role: .destructive) {
                         Task {
-                            /*await*/ expenseVM.removeExpense(by: expense.id)
+                            await expenseVM.deleteExpense(by: expense.id)
                         }
                     }
                 }
@@ -45,26 +45,30 @@ struct ExpensesView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        confirmationDialogPresented = true
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .confirmationDialog("Do you want to delete all expenses?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
-                        Button("Delete", role: .destructive) {
-                            Task {
-                                /*await*/ expenseVM.removeAllExpenses()
-                            }
+                    if expenseVM.isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    } else {
+                        Button {
+                            confirmationDialogPresented = true
+                        } label: {
+                            Image(systemName: "trash")
                         }
-                        Button("Cancel", role: .cancel) {}
+                        .confirmationDialog("Do you want to delete all expenses?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
+                            Button("Delete", role: .destructive) {
+                                Task {
+                                    await expenseVM.deleteAllExpenses()
+                                }
+                            }
+                            Button("Cancel", role: .cancel) {}
+                        }
                     }
-                    
                 }
             }
             .navigationTitle("Expenses")
             .refreshable {
                 Task {
-                    //await expenseVM.fetchExpenses()
+                    await expenseVM.fetchAllExpenses()
                 }
             }
             .alert(isPresented: $expenseVM.errorOccurred) {
@@ -97,17 +101,25 @@ struct AddExpenseView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    Task {
-                        /*await*/ expenseVM.addExpense(description: expenseDescription, amount: expenseAmount ,type: expenseType)
-                        dismiss()
+                if expenseVM.isLoading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .onDisappear {
+                            if !expenseVM.errorOccurred {
+                                dismiss()
+                            }
+                        }
+                } else {
+                    Button {
+                        Task {
+                            await expenseVM.createExpense(description: expenseDescription, amount: expenseAmount ,type: expenseType)
+                        }
+                    } label: {
+                        Text("Save")
+                            .fontWeight(.bold)
                     }
-                } label: {
-                    Text("Save")
-                        .fontWeight(.bold)
+                    .disabled(expenseAmount.isZero)
                 }
-                //.disabled(expenseAmount?.isZero ?? false)
-                .disabled(expenseAmount.isZero)
             }
         }
         .toolbar {
@@ -149,14 +161,25 @@ struct EditExpenseView: View {
                             .keyboardType(.numberPad)
                     }
                     Section {
-                        Button("Delete expense", role: .destructive) {
+                        Button(role: .destructive, action: {
                             confirmationDialogPresented = true
-                        }
+                        }, label: {
+                            if expenseVM.isLoading {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                    .onDisappear {
+                                        if !expenseVM.errorOccurred {
+                                            dismiss()
+                                        }
+                                    }
+                            } else {
+                                Text("Delete expense")
+                            }
+                        })
                         .confirmationDialog("Do you want to delete this expense?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
                             Button("Delete", role: .destructive) {
                                 Task {
-                                    /*await*/ expenseVM.removeExpense(by: expense.id)
-                                    dismiss()
+                                    await expenseVM.deleteExpense(by: expense.id)
                                 }
                             }
                             Button("Cancel", role: .cancel) {}
@@ -166,17 +189,25 @@ struct EditExpenseView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        Task {
-                            /*await*/ expenseVM.updateExpense(expense)
-                            dismiss()
+                    if expenseVM.isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .onDisappear {
+                                if !expenseVM.errorOccurred {
+                                    dismiss()
+                                }
+                            }
+                    } else {
+                        Button {
+                            Task {
+                                await expenseVM.updateExpense(expense)
+                            }
+                        } label: {
+                            Text("Save")
+                                .fontWeight(.bold)
                         }
-                    } label: {
-                        Text("Save")
-                            .fontWeight(.bold)
+                        .disabled(expense.amount.isZero)
                     }
-                    .disabled(expense.amount.isZero)
-                    
                 }
             }
             .navigationTitle("Edit expense")

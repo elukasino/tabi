@@ -11,17 +11,17 @@ struct ContentView: View {
     @StateObject var tripVM: TripVM
     @StateObject var expenseVM: ExpenseVM
     @StateObject var driverVM: DriverVM
-    @StateObject var authVM: AuthVM
+    //@StateObject var authVM: AuthVM
     
     init(appDependency: AppDependency) {
         _tripVM = StateObject(wrappedValue: TripVM(tripService: appDependency.tripService))
         _expenseVM = StateObject(wrappedValue: ExpenseVM(expenseService: appDependency.expenseService))
         _driverVM = StateObject(wrappedValue: DriverVM(driverService: appDependency.driverService))
-        _authVM = StateObject(wrappedValue: appDependency.authVM)
+        //_authVM = StateObject(wrappedValue: appDependency.authVM)
     }
     
     var body: some View {
-        if authVM.user != nil {
+        //if authVM.user != nil {
             TabView {
                 SummaryView()
                     .environmentObject(tripVM)
@@ -52,11 +52,16 @@ struct ContentView: View {
                             .foregroundStyle(.blue, .indigo)
                     }
             }
-        }
+            .onAppear {
+                Task {
+                    await driverVM.fetchAllDrivers()
+                }
+            }
+        /*}
         else {
             AuthView()
                 .environmentObject(authVM)
-        }
+        }*/
     }
 }
 

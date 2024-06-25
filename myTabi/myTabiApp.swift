@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import FirebaseCore
+import Firebase
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -18,10 +18,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct myTabiApp: App {
-    //@UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    init() {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    /*init() {
         FirebaseApp.configure()
-    }
+    }*/
     
     //let appDependency = AppDependency.shared
     

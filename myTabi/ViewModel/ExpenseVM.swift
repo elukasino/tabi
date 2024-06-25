@@ -13,12 +13,41 @@ final class ExpenseVM: ObservableObject {
     
     @Published var errorOccurred: Bool = false
     @Published var errorMessage: String?
+    @Published var isLoading = false
     
     init(expenseService: ExpenseService) {
         self.expenseService = expenseService
     }
     
+    @MainActor
+    func fetchAllExpenses() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            self.expenses = try await expenseService.fetchAllExpenses()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            errorOccurred = true
+        }
+        
+    }
+    
+    @MainActor
+    func createExpense(description: String? = nil, amount: Double, type: ExpenseType) async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await expenseService.createExpense(description: description, amount: amount, type: type)
+            await fetchAllExpenses()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            errorOccurred = true
+        }
+    }
+    
     func getExpense(by expenseId: String) -> Expense? {
+        isLoading = true
+        defer { isLoading = false }
         if let expense = expenses.first(where: { $0.id == expenseId }) {
             return expense
         } else {
@@ -28,29 +57,42 @@ final class ExpenseVM: ObservableObject {
         return nil
     }
     
-    func addExpense(description: String = "", amount: Double, type: ExpenseType) {
-        expenses.append(Expense(description: description == "" ? nil : description, amount: amount, type: type))
-    }
-    
-    func updateExpense(_ updatedExpense: Expense) {
-        if let index = expenses.firstIndex(where: { $0.id == updatedExpense.id }) {
-            expenses[index] = updatedExpense
-        } else {
-            errorMessage = "Expense not found"
+    @MainActor
+    func updateExpense(_ updatedExpense: Expense) async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await expenseService.updateExpense(expenseToUpdate: updatedExpense)
+            await fetchAllExpenses()
+        } catch {
+            self.errorMessage = error.localizedDescription
             errorOccurred = true
         }
     }
     
-    func removeExpense(by expenseId: String) {
-        if let index = expenses.firstIndex(where: { $0.id == expenseId }) {
-            expenses.remove(at: index)
-        } else {
-            errorMessage = "Expense not found"
+    @MainActor
+    func deleteExpense(by expenseId: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await expenseService.deleteExpense(expenseId: expenseId)
+            await fetchAllExpenses()
+        } catch {
+            self.errorMessage = error.localizedDescription
             errorOccurred = true
         }
     }
     
-    func removeAllExpenses() {
-        expenses.removeAll()
+    @MainActor
+    func deleteAllExpenses() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await expenseService.deleteAllExpenses(expenses: expenses)
+            await fetchAllExpenses()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            errorOccurred = true
+        }
     }
 }

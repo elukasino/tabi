@@ -13,40 +13,41 @@ final class DriverVM: ObservableObject {
     
     @Published var errorOccurred: Bool = false
     @Published var errorMessage: String?
+    @Published var isLoading = false
     
-    @MainActor
     init(driverService: DriverService) {
         self.driverService = driverService
-        fetchDrivers()
     }
     
     @MainActor
-    func fetchDrivers() {
-        Task {
-            do {
-                self.drivers = try await driverService.fetchDrivers()
-            } catch {
-                self.errorMessage = error.localizedDescription
-                errorOccurred = true
-            }
+    func fetchAllDrivers() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            self.drivers = try await driverService.fetchAllDrivers()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            errorOccurred = true
+        }
+        
+    }
+    
+    @MainActor
+    func createDriver(firstName: String, lastName: String, usualLocations : [String] = []) async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await driverService.createDriver(firstName: firstName, lastName: lastName)
+            await fetchAllDrivers()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            errorOccurred = true
         }
     }
     
-    @MainActor
-    func saveDriver(_ driver: Driver) {
-        Task {
-            do {
-                try await driverService.saveDriver(driver)
-                fetchDrivers()
-            } catch {
-                self.errorMessage = error.localizedDescription
-                errorOccurred = true
-            }
-        }
-    }
-    
-    @MainActor
     func getDriver(by driverId: String) -> Driver? {
+        isLoading = true
+        defer { isLoading = false }
         if let driver = drivers.first(where: { $0.id == driverId }) {
             return driver
         } else {
@@ -56,29 +57,42 @@ final class DriverVM: ObservableObject {
         return nil
     }
     
-    func addDriver(firstName: String, lastName: String) {
-        drivers.append(Driver(firstName: firstName, lastName: lastName, usualLocations: []))
-    }
-    
-    func updateDriver(_ updatedDriver: Driver) {
-        if let index = drivers.firstIndex(where: { $0.id == updatedDriver.id }) {
-            drivers[index] = updatedDriver
-        } else {
-            errorMessage = "Driver not found"
+    @MainActor
+    func updateDriver(_ updatedDriver: Driver) async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await driverService.updateDriver(driverToUpdate: updatedDriver)
+            await fetchAllDrivers()
+        } catch {
+            self.errorMessage = error.localizedDescription
             errorOccurred = true
         }
     }
     
-    func removeDriver(by driverId: String) {
-        if let index = drivers.firstIndex(where: { $0.id == driverId }) {
-            drivers.remove(at: index)
-        } else {
-            errorMessage = "Driver not found"
+    @MainActor
+    func deleteDriver(by driverId: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await driverService.deleteDriver(driverId: driverId)
+            await fetchAllDrivers()
+        } catch {
+            self.errorMessage = error.localizedDescription
             errorOccurred = true
         }
     }
     
-    func removeAllDrivers() {
-        drivers.removeAll()
+    @MainActor
+    func deleteAllDrivers() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            try await driverService.deleteAllDrivers(drivers: drivers)
+            await fetchAllDrivers()
+        } catch {
+            self.errorMessage = error.localizedDescription
+            errorOccurred = true
+        }
     }
 }

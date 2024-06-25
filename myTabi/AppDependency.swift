@@ -12,16 +12,16 @@ import FirebaseFirestore
 final class AppDependency {
     static let shared = AppDependency()
 
-    let authVM: AuthVM
-    let fireStore: Firestore
+    //let authVM: AuthVM
+    let fireStoreDb: Firestore
     
     lazy var csvParser = CSVParser()
-    lazy var tripService: TripService = { TripService(csvParser: csvParser, firestore: fireStore) } ()
-    lazy var expenseService: ExpenseService = { ExpenseService() } ()
-    lazy var driverService: DriverService = { DriverService(firestore: fireStore) } ()
+    lazy var tripService: TripService = { TripService(csvParser: csvParser, fireStoreDb: fireStoreDb) } ()
+    lazy var expenseService: ExpenseService = { ExpenseService(fireStoreDb: fireStoreDb) } ()
+    lazy var driverService: DriverService = { DriverService(fireStoreDb: fireStoreDb) } ()
     
     init() {
-        self.authVM = AuthVM()
-        self.fireStore = Firestore.firestore()
+        //self.authVM = AuthVM()
+        self.fireStoreDb = Firestore.firestore()
     }
 }

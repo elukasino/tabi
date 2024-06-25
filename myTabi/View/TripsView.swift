@@ -44,7 +44,7 @@ struct TripsView: View {
                     .confirmationDialog("Do you want to delete all trips?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
                         Button("Delete", role: .destructive) {
                             Task {
-                                /*await*/ tripVM.removeAllTrips()
+                                await tripVM.deleteAllTrips()
                             }
                         }
                         Button("Cancel", role: .cancel) {}
@@ -57,7 +57,9 @@ struct TripsView: View {
                 allowedContentTypes: [.commaSeparatedText],
                 allowsMultipleSelection: false
             ) { result in
-                tripVM.handleFileImport(result: result)
+                Task {
+                    await tripVM.handleFileImport(result: result)
+                }
             }
             .alert(isPresented: $tripVM.errorOccurred) {
                 Alert(title: Text("Error"), message: Text(tripVM.errorMessage ?? "Unknown error"), dismissButton: .default(Text("OK")))
