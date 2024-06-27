@@ -15,16 +15,25 @@ struct DriversView: View {
     
     var body: some View {
         NavigationStack {
-            List(driverVM.drivers) { driver in
-                NavigationLink {
-                    EditDriverView(driver: driver)
-                } label: {
-                    Text(driver.firstName)
-                }
-                .swipeActions {
-                    Button("Delete", role: .destructive) {
-                        Task {
-                            await driverVM.deleteDriver(by: driver.id)
+            ZStack {
+                if driverVM.drivers.isEmpty {
+                    BackgroundIconView(symbolName: "custom.person.2.slash")
+                    ScrollView {
+                        Rectangle().opacity(0)
+                    }
+                } else {
+                    List(driverVM.drivers) { driver in
+                        NavigationLink {
+                            EditDriverView(driver: driver)
+                        } label: {
+                            Text(driver.firstName)
+                        }
+                        .swipeActions {
+                            Button("Delete", role: .destructive) {
+                                Task {
+                                    await driverVM.deleteDriver(by: driver.id)
+                                }
+                            }
                         }
                     }
                 }

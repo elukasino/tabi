@@ -12,19 +12,27 @@ struct TripsView: View {
     @EnvironmentObject var driverVM: DriverVM
     
     @State var fileImporterPresented = false
-    @State var importingSheetPresented = false
+    //@State var importingSheetPresented = false
     @State var confirmationDialogPresented = false
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack {
-                    ForEach(tripVM.trips) { trip in
-                        TripView(trip: trip)
+            ZStack {
+                if tripVM.trips.isEmpty {
+                    BackgroundIconView(symbolName: "custom.map.slash")
+                }
+                ScrollView {
+                    VStack {
+                        if tripVM.trips.isEmpty {
+                            Rectangle().opacity(0)
+                        }
+                        ForEach(tripVM.trips) { trip in
+                            TripView(trip: trip)
+                        }
                     }
                 }
+                
             }
-            .navigationTitle("Trips")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -36,21 +44,47 @@ struct TripsView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        confirmationDialogPresented = true
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .confirmationDialog("Do you want to delete all trips?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
-                        Button("Delete", role: .destructive) {
-                            Task {
-                                await tripVM.deleteAllTrips()
-                            }
+                    if tripVM.isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                    } else {
+                        Button {
+                            confirmationDialogPresented = true
+                        } label: {
+                            Image(systemName: "trash")
                         }
-                        Button("Cancel", role: .cancel) {}
+                        .confirmationDialog("Do you want to delete all trips?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
+                            Button("Delete", role: .destructive) {
+                                Task {
+                                    await tripVM.deleteAllTrips()
+                                }
+                            }
+                            Button("Cancel", role: .cancel) {}
+                        }
                     }
-                    
                 }
+            }
+            .navigationTitle("Trips")
+            .refreshable {
+                Task {
+                    await driverVM.fetchAllDrivers()
+                    await tripVM.fetchAllTrips()
+                }
+            }
+            .alert(isPresented: $tripVM.errorOccurred) {
+                Alert(title: Text("Error"), message: Text(tripVM.errorMessage ?? "Unknown error"), dismissButton: .default(Text("OK")))
+            }
+            .alert(isPresented: $tripVM.duplicateFound) {
+                Alert(
+                    title: Text("Duplicate found"),
+                    message: Text("File contains trips that are already stored in your database. Do you want to proceed and import duplicates or skip these dupliactes? Your decision will be applied to all trips in this import."),
+                    primaryButton: .default(Text("Import duplicates")) {
+                        tripVM.handleDuplicatesDecision(decision: true)
+                    },
+                    secondaryButton: .cancel(Text("Skip duplicates")) {
+                        tripVM.handleDuplicatesDecision(decision: false)
+                    }
+                )
             }
             .fileImporter(
                 isPresented: $fileImporterPresented,
@@ -60,9 +94,6 @@ struct TripsView: View {
                 Task {
                     await tripVM.handleFileImport(result: result)
                 }
-            }
-            .alert(isPresented: $tripVM.errorOccurred) {
-                Alert(title: Text("Error"), message: Text(tripVM.errorMessage ?? "Unknown error"), dismissButton: .default(Text("OK")))
             }
         }
     }

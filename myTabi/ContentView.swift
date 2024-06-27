@@ -54,6 +54,8 @@ struct ContentView: View {
             }
             .onAppear {
                 Task {
+                    await tripVM.fetchAllTrips()
+                    await expenseVM.fetchAllExpenses()
                     await driverVM.fetchAllDrivers()
                 }
             }

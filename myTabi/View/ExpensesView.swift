@@ -15,16 +15,25 @@ struct ExpensesView: View {
     
     var body: some View {
         NavigationStack {
-            List(expenseVM.expenses) { expense in
-                NavigationLink {
-                    EditExpenseView(expense: expense)
-                } label: {
-                    Text(expense.type.rawValue)
-                }
-                .swipeActions {
-                    Button("Delete", role: .destructive) {
-                        Task {
-                            await expenseVM.deleteExpense(by: expense.id)
+            ZStack {
+                if expenseVM.expenses.isEmpty {
+                    BackgroundIconView(symbolName: "custom.creditcard.slash")
+                    ScrollView {
+                        Rectangle().opacity(0)
+                    }
+                } else {
+                    List(expenseVM.expenses) { expense in
+                        NavigationLink {
+                            EditExpenseView(expense: expense)
+                        } label: {
+                            Text(expense.type.rawValue)
+                        }
+                        .swipeActions {
+                            Button("Delete", role: .destructive) {
+                                Task {
+                                    await expenseVM.deleteExpense(by: expense.id)
+                                }
+                            }
                         }
                     }
                 }

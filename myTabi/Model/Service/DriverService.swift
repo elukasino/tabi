@@ -17,7 +17,7 @@ class DriverService {
     }
     
     func fetchAllDrivers() async throws -> [Driver] {
-        let snapshot = try await db.collection("drivers").getDocuments()
+        let snapshot = try await db.collection("drivers").order(by: "timestamp").getDocuments()
         return snapshot.documents.compactMap { document in
             Driver(id: document.documentID,
                    firstName: document["firstName"] as? String ?? "",
@@ -27,7 +27,7 @@ class DriverService {
     }
     
     func createDriver(firstName: String, lastName: String, usualLocations : [String] = []) async throws {
-        try await db.collection("drivers").addDocument(data: ["firstName" : firstName, "lastName" : lastName])
+        try await db.collection("drivers").addDocument(data: ["firstName" : firstName, "lastName" : lastName, "timestamp" : Date()])
     }
     
     func updateDriver(driverToUpdate: Driver) async throws {

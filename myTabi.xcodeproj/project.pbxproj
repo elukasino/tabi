@@ -42,6 +42,8 @@
 		654BB3472C27679700E21B4C /* FileImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654BB3462C27679700E21B4C /* FileImportView.swift */; };
 		654BB34C2C276A1B00E21B4C /* SwiftCSV in Frameworks */ = {isa = PBXBuildFile; productRef = 654BB34B2C276A1B00E21B4C /* SwiftCSV */; };
 		654BB34E2C28112600E21B4C /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654BB34D2C28112600E21B4C /* CSVParser.swift */; };
+		65C442862C2C820000110A16 /* MiscViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C442852C2C820000110A16 /* MiscViews.swift */; };
+		65C442882C2CA51000110A16 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C442872C2CA51000110A16 /* MapView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -93,6 +95,8 @@
 		654BB3422C27672300E21B4C /* DriverVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriverVM.swift; sourceTree = "<group>"; };
 		654BB3462C27679700E21B4C /* FileImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileImportView.swift; sourceTree = "<group>"; };
 		654BB34D2C28112600E21B4C /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
+		65C442852C2C820000110A16 /* MiscViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscViews.swift; sourceTree = "<group>"; };
+		65C442872C2CA51000110A16 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -234,10 +238,12 @@
 				6537CF6F2C28374300402C77 /* SummaryView.swift */,
 				6537CF712C28375200402C77 /* TripsView.swift */,
 				6537CF852C29A93100402C77 /* TripView.swift */,
+				65C442872C2CA51000110A16 /* MapView.swift */,
 				6537CF752C28376300402C77 /* ExpensesView.swift */,
 				6537CF732C28375A00402C77 /* DriversView.swift */,
 				654BB3462C27679700E21B4C /* FileImportView.swift */,
 				6537CF9D2C2A275B00402C77 /* AuthView.swift */,
+				65C442852C2C820000110A16 /* MiscViews.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -389,8 +395,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				6537CF982C29D92D00402C77 /* ExpenseService.swift in Sources */,
+				65C442882C2CA51000110A16 /* MapView.swift in Sources */,
 				654BB3312C275DB400E21B4C /* DriverModel.swift in Sources */,
 				654BB2F92C27254600E21B4C /* ContentView.swift in Sources */,
+				65C442862C2C820000110A16 /* MiscViews.swift in Sources */,
 				654BB34E2C28112600E21B4C /* CSVParser.swift in Sources */,
 				6537CF762C28376300402C77 /* ExpensesView.swift in Sources */,
 				6537CF822C28CAF200402C77 /* AppError.swift in Sources */,
