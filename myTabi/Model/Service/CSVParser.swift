@@ -21,7 +21,7 @@ class CSVParser {
         let endDateTimeColumn = 3
         let distanceColumn = 4
         
-        var formatter = DateFormatter() //AppDependency.shared.storeDateFormatter
+        let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
         
         do {

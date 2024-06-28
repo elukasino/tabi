@@ -14,8 +14,6 @@ final class AppDependency {
 
     //let authVM: AuthVM
     let fireStoreDb: Firestore
-//    let storeDateFormatter: DateFormatter
-//    let displayDateFormatter: DateFormatter
     
     lazy var csvParser = CSVParser()
     lazy var tripService: TripService = { TripService(csvParser: csvParser, fireStoreDb: fireStoreDb) } ()
@@ -25,8 +23,5 @@ final class AppDependency {
     init() {
         //self.authVM = AuthVM()
         self.fireStoreDb = Firestore.firestore()
-//        storeDateFormatter = DateFormatter()
-//        storeDateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
-//        displayDateFormatter = DateFormatter()
     }
 }

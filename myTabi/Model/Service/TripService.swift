@@ -35,8 +35,6 @@ class TripService {
             
             let startTimestamp = document["startDateTime"] as? Timestamp
             let endTimestamp = document["endDateTime"] as? Timestamp
-            let timezonex = TimeZone(abbreviation: document["originalTimeZone"] as? String ?? "") ?? TimeZone.current
-            print(timezonex.description + (timezonex.abbreviation() ?? "NO ABBR"))
             
             return Trip(id: document.documentID,
                         startDateTime: startTimestamp?.dateValue() ?? Date(), //TODO: coalescing to current date

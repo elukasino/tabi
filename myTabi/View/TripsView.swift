@@ -17,21 +17,22 @@ struct TripsView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                if tripVM.trips.isEmpty {
-                    BackgroundIconView(symbolName: "custom.map.slash")
-                }
-                ScrollView {
-                    VStack {
-                        if tripVM.trips.isEmpty {
-                            Rectangle().opacity(0)
-                        }
+            ScrollView {
+                VStack {
+                    if tripVM.trips.isEmpty {
+                        Rectangle().opacity(0)
+                    } else {
                         ForEach(tripVM.trips) { trip in
                             TripView(trip: trip)
                         }
                     }
                 }
-                
+            }
+            .toolbarBackground(Visibility.automatic)
+            .background {
+                if tripVM.trips.isEmpty {
+                    BackgroundIconView(symbolName: "custom.map.slash")
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -54,7 +55,7 @@ struct TripsView: View {
                             Image(systemName: "trash")
                         }
                         .confirmationDialog("Do you want to delete all trips?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
-                            Button("Delete", role: .destructive) {
+                            Button("Delete all", role: .destructive) {
                                 Task {
                                     await tripVM.deleteAllTrips()
                                 }

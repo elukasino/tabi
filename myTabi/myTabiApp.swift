@@ -22,13 +22,10 @@ struct myTabiApp: App {
     /*init() {
         FirebaseApp.configure()
     }*/
-    
-    //let appDependency = AppDependency.shared
-    
+        
     var body: some Scene {
         WindowGroup {
-            //ContentView(appDependency: appDependency)
-            ContentView(appDependency: AppDependency())
+            ContentView(appDependency: AppDependency.shared)
         }
     }
 }

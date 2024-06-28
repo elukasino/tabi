@@ -47,7 +47,7 @@ struct ContentView: View {
                 DriversView()
                     .environmentObject(driverVM)
                     .tabItem {
-                        Label("Drives", systemImage: "person.2")
+                        Label("Drivers", systemImage: "person.2")
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(.blue, .indigo)
                     }

@@ -33,11 +33,11 @@ final class ExpenseVM: ObservableObject {
     }
     
     @MainActor
-    func createExpense(description: String? = nil, amount: Double, type: ExpenseType) async {
+    func createExpense(description: String? = nil, amount: String, type: ExpenseType) async {
         isLoading = true
         defer { isLoading = false }
         do {
-            try await expenseService.createExpense(description: description, amount: amount, type: type)
+            try await expenseService.createExpense(description: description, amount: Double(amount)!, type: type) //TODO: Forced-unwrap
             await fetchAllExpenses()
         } catch {
             self.errorMessage = error.localizedDescription
@@ -58,7 +58,7 @@ final class ExpenseVM: ObservableObject {
     }
     
     @MainActor
-    func updateExpense(_ updatedExpense: Expense) async {
+    func updateExpense(updatedExpense: Expense) async {
         isLoading = true
         defer { isLoading = false }
         do {

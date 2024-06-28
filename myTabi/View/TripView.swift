@@ -8,34 +8,6 @@
 import SwiftUI
 import CoreLocation
 
-/*struct TripView: View {
-    @EnvironmentObject var tripVM: TripVM
-    @EnvironmentObject var driverVM: DriverVM
-    var trip: Trip
-    
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text("\(trip.startLocation) to \(trip.endLocation)")
-                    .font(.headline)
-                Text("Distance: \(trip.distance) km")
-                    .font(.subheadline)
-            }
-            Spacer()
-            
-            if let driverId = trip.driverId, let driver = driverVM.getDriver(by: driverId) {
-                Text(driver.firstName + " " + driver.lastName)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-            } else {
-                Text("Unassigned")
-                    .font(.subheadline)
-                    .foregroundColor(.red)
-            }
-        }
-    }
-}*/
-
 struct TripView: View {
     @EnvironmentObject var tripVM: TripVM
     @EnvironmentObject var driverVM: DriverVM
@@ -51,46 +23,10 @@ struct TripView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading) {
+            LazyVStack(alignment: .leading) {
                 MapView(startLocation: trip.startLocation, endLocation: trip.endLocation)
                 .frame(height: 150)
                 .clipShape(CustomRoundedRectangle(corners: [.topLeft, .topRight], radius: 20))
-                /*HStack(alignment: .center) {
-                    VStack(alignment: .leading) {
-                        Group {
-                            Text("Start")
-                                .font(.callout)
-                                .foregroundColor(.gray)
-                            Text(trip.startDateTime)
-                                .font(.callout)
-                            Text(trip.startLocation.address)
-                                .font(.callout)
-                                .padding(.bottom)
-                        }
-                        Group {
-                            Text("Destination")
-                                .font(.callout)
-                                .foregroundColor(.gray)
-                            Text(trip.endDateTime)
-                                .font(.callout)
-                            Text(trip.endLocation.address)
-                                .font(.callout)
-                                .padding(.bottom)
-                            Image("dotted-trip-line")
-                                .resizable()
-                                .frame(width: 75, height: 20)
-                        }
-                    }
-                    Spacer()
-                    VStack(spacing: -10.0) {
-                        Text(String(trip.distance))
-                            .font(.title)
-                            .fontWeight(.black)
-                        Text("km")
-                            .font(.title)
-                            .fontWeight(.black)
-                    }
-                }*/
                 HStack(alignment: .top) {
                     VStack(alignment: .leading) {
                         Text("Start")
@@ -133,24 +69,36 @@ struct TripView: View {
                             .font(.callout)
                     }
                 }
-                .padding([.leading, .bottom, .trailing])
+                .padding([.leading, .trailing])
                 .padding(.top, 4)
-                Picker("Driver", selection: $selectedDriver) {
-                    ForEach(driverVM.drivers) { driver in
-                        Text(driver.firstName)
+                Group {
+                    if driverVM.drivers.count < 6 {
+                        Picker("Driver", selection: $selectedDriver) {
+                            ForEach(driverVM.drivers) { driver in
+                                Text(driver.firstName.isEmpty ? driver.lastName : driver.firstName).tag(driver.id)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    } else {
+                        Picker("Driver", selection: $selectedDriver) {
+                            ForEach(driverVM.drivers) { driver in
+                                Text(driver.firstName + " " + driver.lastName).tag(driver.id)
+                            }
+                        }
+                        .pickerStyle(.menu)
                     }
                 }
-                .pickerStyle(SegmentedPickerStyle())
                 .onChange(of: selectedDriver, {
                     Task {
                         trip.driverId = selectedDriver
                         await tripVM.updateTripDriver(trip)
                     }
                 })
-            }
+                .padding()
+            } //VStack ends here
             .background(RoundedRectangle(cornerRadius: 20)
                 .fill(colorScheme == .light ? .white : Color(red: 0.15, green: 0.15, blue: 0.15))
-                .shadow(color: colorScheme == .light ? .black.opacity(0.33) : .white.opacity(0.25), radius: 8.0))
+                .shadow(color: colorScheme == .light ? .black.opacity(0.2) : .white.opacity(0.25), radius: 8.0))
             .padding()
         }
     }

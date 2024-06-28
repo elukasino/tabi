@@ -33,7 +33,7 @@ class DriverService {
     func updateDriver(driverToUpdate: Driver) async throws {
         try await db.collection("drivers").document(driverToUpdate.id).setData(["firstName" : driverToUpdate.firstName,
                                                                                 "lastName" : driverToUpdate.lastName,
-                                                                                "usualLocations" : driverToUpdate.usualLocations])
+                                                                                "usualLocations" : driverToUpdate.usualLocations], merge: true)
     }
     
     func deleteDriver(driverId: String) async throws {

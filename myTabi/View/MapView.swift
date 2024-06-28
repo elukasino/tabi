@@ -23,7 +23,7 @@ struct MapView: View {
                 Marker("Destination", coordinate: endLocation.coordinate!)
             }
         }
-            .mapStyle(.standard(elevation: .realistic))
+        .mapStyle(.standard(elevation: .realistic))
     }
 }
 

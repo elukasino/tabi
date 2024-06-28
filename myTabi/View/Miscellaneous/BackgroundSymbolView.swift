@@ -1,5 +1,5 @@
 //
-//  MiscViews.swift
+//  BackgroundSymbolView.swift
 //  myTabi
 //
 //  Created by Lukáš Cmíral on 26.06.2024.

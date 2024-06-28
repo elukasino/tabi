@@ -22,7 +22,7 @@ class ExpenseService {
             Expense(id: document.documentID,
                     description: document["description"] as? String ?? nil,
                     amount: document["amount"] as? Double ?? 0.0,
-                    type: document["type"] as? ExpenseType ?? .other)
+                    type: ExpenseType(rawValue: document["type"] as? String ?? "Other") ?? .other)
         }
     }
     
@@ -32,8 +32,8 @@ class ExpenseService {
     
     func updateExpense(expenseToUpdate: Expense) async throws {
         try await db.collection("expenses").document(expenseToUpdate.id).setData(["description" : expenseToUpdate.description ?? "",
-                                                                                "amount" : expenseToUpdate.amount,
-                                                                                "type" : expenseToUpdate.type])
+                                                                                  "amount" : expenseToUpdate.amount,
+                                                                                  "type" : expenseToUpdate.type.rawValue], merge: true)
     }
     
     func deleteExpense(expenseId: String) async throws {

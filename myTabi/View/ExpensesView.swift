@@ -15,11 +15,13 @@ struct ExpensesView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
+            Group {
                 if expenseVM.expenses.isEmpty {
-                    BackgroundIconView(symbolName: "custom.creditcard.slash")
                     ScrollView {
                         Rectangle().opacity(0)
+                    }
+                    .background {
+                        BackgroundIconView(symbolName: "custom.creditcard.slash")
                     }
                 } else {
                     List(expenseVM.expenses) { expense in
@@ -64,7 +66,7 @@ struct ExpensesView: View {
                             Image(systemName: "trash")
                         }
                         .confirmationDialog("Do you want to delete all expenses?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
-                            Button("Delete", role: .destructive) {
+                            Button("Delete all", role: .destructive) {
                                 Task {
                                     await expenseVM.deleteAllExpenses()
                                 }
@@ -91,57 +93,87 @@ struct AddExpenseView: View {
     @EnvironmentObject var expenseVM: ExpenseVM
     @Environment(\.dismiss) var dismiss
     
-    @State var expenseDescription: String = ""
-    @State var expenseAmount: Double = 0.0
-    @State var expenseType: ExpenseType = .other
+    @State private var expenseDescription: String = ""
+    @State private var expenseAmountString: String = ""
+    @State private var expenseType: ExpenseType = .other
+    
+    @FocusState private var focusedField: FocusedField?
+    enum FocusedField {
+        case description, amount
+    }
     
     var body: some View {
-        VStack {
-            Form {
-                Picker("Expense type", selection: $expenseType) {
-                    ForEach(ExpenseType.allCases) { type in
-                        Text(type.rawValue).tag(type)
+        NavigationStack {
+            VStack {
+                Form {
+                    Picker("Expense type", selection: $expenseType) {
+                        ForEach(ExpenseType.allCases) { type in
+                            Text(type.rawValue).tag(type)
+                        }
+                    }
+                    TextField("Description", text: $expenseDescription)
+                        .focused($focusedField, equals: .description)
+                    HStack {
+                        TextField("Amount", text: $expenseAmountString)
+                            .numbersOnly($expenseAmountString, includeDecimal: true)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .amount)
+                        Text(Locale.current.currency?.identifier ?? "CZK")
+                            .foregroundStyle(.gray)
                     }
                 }
-                TextField("Description", text: $expenseDescription)
-                TextField("Amount", value: $expenseAmount, format: .currency(code: Locale.current.currency?.identifier ?? "Kč"))
-                    .keyboardType(.decimalPad)
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if expenseVM.isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .onDisappear {
-                            if !expenseVM.errorOccurred {
-                                dismiss()
-                            }
-                        }
-                } else {
+            .onAppear {
+                focusedField = .amount
+                UITextField.appearance().clearButtonMode = .whileEditing
+            }
+            .toolbar {
+                ToolbarItem(placement: .keyboard) {
+                    Spacer()
+                }
+                ToolbarItem(placement: .keyboard) {
                     Button {
-                        Task {
-                            await expenseVM.createExpense(description: expenseDescription, amount: expenseAmount ,type: expenseType)
-                        }
+                        focusedField = nil
                     } label: {
-                        Text("Save")
-                            .fontWeight(.bold)
+                        Image(systemName: "keyboard.chevron.compact.down")
                     }
-                    .disabled(expenseAmount.isZero)
                 }
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
-                    dismiss()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if expenseVM.isLoading {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .onDisappear {
+                                if !expenseVM.errorOccurred {
+                                    dismiss()
+                                }
+                            }
+                    } else {
+                        Button {
+                            Task {
+                                await expenseVM.createExpense(description: expenseDescription, amount: expenseAmountString ,type: expenseType)
+                            }
+                        } label: {
+                            Text("Save")
+                                .fontWeight(.bold)
+                        }
+                        .disabled(expenseAmountString.isEmpty)
+                    }
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert(isPresented: $expenseVM.errorOccurred) {
+                Alert(title: Text("Error"), message: Text(expenseVM.errorMessage ?? "Unknown error"), dismissButton: .default(Text("OK")))
+            }
+            .navigationTitle("Add expense")
         }
-        .alert(isPresented: $expenseVM.errorOccurred) {
-            Alert(title: Text("Error"), message: Text(expenseVM.errorMessage ?? "Unknown error"), dismissButton: .default(Text("OK")))
-        }
-        .navigationTitle("Add expense")
     }
 }
 
@@ -150,7 +182,13 @@ struct EditExpenseView: View {
     @Environment(\.dismiss) var dismiss
     
     @State var expense: Expense
+    @State private var expenseAmountString: String = ""
     @State var confirmationDialogPresented: Bool = false
+    
+    @FocusState private var focusedField: FocusedField?
+    enum FocusedField {
+        case description, amount
+    }
     
     var body: some View {
         NavigationStack {
@@ -166,8 +204,15 @@ struct EditExpenseView: View {
                             get: { expense.description ?? "" },
                             set: { expense.description = $0.isEmpty ? nil : $0 }
                         ))
-                        TextField("Amount", value: $expense.amount, format: .currency(code: Locale.current.currency?.identifier ?? "Kč"))
-                            .keyboardType(.numberPad)
+                        .focused($focusedField, equals: .description)
+                        HStack {
+                            TextField("Amount", text: $expenseAmountString)
+                                .numbersOnly($expenseAmountString, includeDecimal: true)
+                                .keyboardType(.decimalPad)
+                                .focused($focusedField, equals: .amount)
+                            Text(Locale.current.currency?.identifier ?? "CZK")
+                                .foregroundStyle(.gray)
+                        }
                     }
                     Section {
                         Button(role: .destructive, action: {
@@ -185,14 +230,29 @@ struct EditExpenseView: View {
                                 Text("Delete expense")
                             }
                         })
-                        .confirmationDialog("Do you want to delete this expense?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
-                            Button("Delete", role: .destructive) {
-                                Task {
-                                    await expenseVM.deleteExpense(by: expense.id)
-                                }
-                            }
-                            Button("Cancel", role: .cancel) {}
-                        }
+                    }
+                }
+            }
+            .confirmationDialog("Do you want to delete this expense?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await expenseVM.deleteExpense(by: expense.id)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+            .onAppear {
+                UITextField.appearance().clearButtonMode = .whileEditing
+            }
+            .toolbar {
+                ToolbarItem(placement: .keyboard) {
+                    Spacer()
+                }
+                ToolbarItem(placement: .keyboard) {
+                    Button {
+                        focusedField = nil
+                    } label: {
+                        Image(systemName: "keyboard.chevron.compact.down")
                     }
                 }
             }
@@ -209,13 +269,14 @@ struct EditExpenseView: View {
                     } else {
                         Button {
                             Task {
-                                await expenseVM.updateExpense(expense)
+                                expense.amount = Double(expenseAmountString)! //TODO: Forced-unwrap, NumbersOnlyViewModifier should guarantee correct value
+                                await expenseVM.updateExpense(updatedExpense: expense)
                             }
                         } label: {
                             Text("Save")
                                 .fontWeight(.bold)
                         }
-                        .disabled(expense.amount.isZero)
+                        .disabled(expenseAmountString.isEmpty)
                     }
                 }
             }
@@ -226,5 +287,10 @@ struct EditExpenseView: View {
 
 #Preview {
     ExpensesView()
+        .environmentObject(ExpenseVM(expenseService: AppDependency.shared.expenseService))
+}
+
+#Preview {
+    AddExpenseView()
         .environmentObject(ExpenseVM(expenseService: AppDependency.shared.expenseService))
 }
