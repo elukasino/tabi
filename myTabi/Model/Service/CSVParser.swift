@@ -61,11 +61,11 @@ class CSVParser {
         }
         return trips
     }
-    
-    func convertToDouble(_ string: String) -> Double? {
-        let normalizedString = string.replacingOccurrences(of: ",", with: ".")
-        return Double(normalizedString)
-    }
+}
+
+func convertToDouble(_ string: String) -> Double? {
+    let normalizedString = string.replacingOccurrences(of: ",", with: ".")
+    return Double(normalizedString)
 }
 
 extension TimeZone {

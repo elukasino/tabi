@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Driver: Hashable, Identifiable, Codable {
+struct Driver: Identifiable, Equatable, Hashable {
     var id: String = UUID().uuidString
     var firstName: String
     var lastName: String

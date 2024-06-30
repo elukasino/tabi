@@ -8,15 +8,24 @@
 import Foundation
 
 final class DriverVM: ObservableObject {
+    struct Dependencies {
+        let tripVM: TripVM
+        let tripService: TripService
+        let driverService: DriverService
+    }
+    private let tripVM: TripVM
+    private let tripService: TripService
     private let driverService: DriverService
-    @Published var drivers: [Driver] = []
     
+    @Published var drivers: [Driver] = []
     @Published var errorOccurred: Bool = false
     @Published var errorMessage: String?
     @Published var isLoading = false
     
-    init(driverService: DriverService) {
-        self.driverService = driverService
+    init(dependencies: Dependencies) {
+        tripVM = dependencies.tripVM
+        tripService = dependencies.tripService
+        driverService = dependencies.driverService
     }
     
     @MainActor
@@ -76,7 +85,9 @@ final class DriverVM: ObservableObject {
         defer { isLoading = false }
         do {
             try await driverService.deleteDriver(driverId: driverId)
+            try await tripService.deleteDriverIdFromTrips(driverId: driverId, trips: tripVM.trips) //Remove leftover driver IDs from trips
             await fetchAllDrivers()
+            await tripVM.fetchAllTrips()
         } catch {
             self.errorMessage = error.localizedDescription
             errorOccurred = true

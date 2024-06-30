@@ -152,7 +152,7 @@ struct AddExpenseView: View {
                     } else {
                         Button {
                             Task {
-                                await expenseVM.createExpense(description: expenseDescription, amount: expenseAmountString ,type: expenseType)
+                                await expenseVM.createExpense(description: expenseDescription, amountString: expenseAmountString ,type: expenseType)
                             }
                         } label: {
                             Text("Save")
@@ -190,6 +190,8 @@ struct EditExpenseView: View {
         case description, amount
     }
     
+    let formatter = NumberFormatter()
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -210,6 +212,11 @@ struct EditExpenseView: View {
                                 .numbersOnly($expenseAmountString, includeDecimal: true)
                                 .keyboardType(.decimalPad)
                                 .focused($focusedField, equals: .amount)
+                                .onAppear {
+                                    formatter.numberStyle = .decimal
+                                    formatter.locale = Locale.current
+                                    expenseAmountString = formatter.string(from: NSNumber(value: expense.amount)) ?? "NaN"
+                                }
                             Text(Locale.current.currency?.identifier ?? "CZK")
                                 .foregroundStyle(.gray)
                         }
@@ -269,7 +276,7 @@ struct EditExpenseView: View {
                     } else {
                         Button {
                             Task {
-                                expense.amount = Double(expenseAmountString)! //TODO: Forced-unwrap, NumbersOnlyViewModifier should guarantee correct value
+                                expense.amount = convertToDouble(expenseAmountString)! //TODO: Forced-unwrap, NumbersOnlyViewModifier should guarantee correct value
                                 await expenseVM.updateExpense(updatedExpense: expense)
                             }
                         } label: {
@@ -287,10 +294,10 @@ struct EditExpenseView: View {
 
 #Preview {
     ExpensesView()
-        .environmentObject(ExpenseVM(expenseService: AppDependency.shared.expenseService))
+        .environmentObject(ExpenseVM(dependencies: .init(expenseService: AppDependency.shared.expenseService)))
 }
 
 #Preview {
     AddExpenseView()
-        .environmentObject(ExpenseVM(expenseService: AppDependency.shared.expenseService))
+        .environmentObject(ExpenseVM(dependencies: .init(expenseService: AppDependency.shared.expenseService)))
 }

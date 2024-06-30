@@ -43,6 +43,8 @@
 		654BB34C2C276A1B00E21B4C /* SwiftCSV in Frameworks */ = {isa = PBXBuildFile; productRef = 654BB34B2C276A1B00E21B4C /* SwiftCSV */; };
 		654BB34E2C28112600E21B4C /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654BB34D2C28112600E21B4C /* CSVParser.swift */; };
 		6569E3E22C2EC32F00106286 /* NumbersOnlyViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6569E3E12C2EC32F00106286 /* NumbersOnlyViewModifier.swift */; };
+		6569E3E42C2F0ACA00106286 /* SummaryVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6569E3E32C2F0ACA00106286 /* SummaryVM.swift */; };
+		6569E3E62C30193C00106286 /* ChartModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6569E3E52C30193C00106286 /* ChartModel.swift */; };
 		65C442862C2C820000110A16 /* BackgroundSymbolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C442852C2C820000110A16 /* BackgroundSymbolView.swift */; };
 		65C442882C2CA51000110A16 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C442872C2CA51000110A16 /* MapView.swift */; };
 /* End PBXBuildFile section */
@@ -97,6 +99,8 @@
 		654BB3462C27679700E21B4C /* FileImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileImportView.swift; sourceTree = "<group>"; };
 		654BB34D2C28112600E21B4C /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		6569E3E12C2EC32F00106286 /* NumbersOnlyViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumbersOnlyViewModifier.swift; sourceTree = "<group>"; };
+		6569E3E32C2F0ACA00106286 /* SummaryVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryVM.swift; sourceTree = "<group>"; };
+		6569E3E52C30193C00106286 /* ChartModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartModel.swift; sourceTree = "<group>"; };
 		65C442852C2C820000110A16 /* BackgroundSymbolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSymbolView.swift; sourceTree = "<group>"; };
 		65C442872C2CA51000110A16 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -137,6 +141,7 @@
 				654BB3382C275DD300E21B4C /* TripModel.swift */,
 				654BB3342C275DC900E21B4C /* ExpenseModel.swift */,
 				654BB3302C275DB400E21B4C /* DriverModel.swift */,
+				6569E3E52C30193C00106286 /* ChartModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -176,8 +181,8 @@
 			isa = PBXGroup;
 			children = (
 				654BB2F62C27254600E21B4C /* myTabiApp.swift */,
-				654BB2F82C27254600E21B4C /* ContentView.swift */,
 				6537CF772C28AE1B00402C77 /* AppDependency.swift */,
+				654BB2F82C27254600E21B4C /* ContentView.swift */,
 				654BB33D2C27617100E21B4C /* View */,
 				654BB33C2C27616600E21B4C /* ViewModel */,
 				654BB32F2C275D9600E21B4C /* Model */,
@@ -226,6 +231,7 @@
 		654BB33C2C27616600E21B4C /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				6569E3E32C2F0ACA00106286 /* SummaryVM.swift */,
 				654BB33E2C2761AC00E21B4C /* TripVM.swift */,
 				6537CF992C29D96100402C77 /* ExpenseVM.swift */,
 				654BB3422C27672300E21B4C /* DriverVM.swift */,
@@ -414,6 +420,7 @@
 				6537CF762C28376300402C77 /* ExpensesView.swift in Sources */,
 				6569E3E22C2EC32F00106286 /* NumbersOnlyViewModifier.swift in Sources */,
 				6537CF822C28CAF200402C77 /* AppError.swift in Sources */,
+				6569E3E42C2F0ACA00106286 /* SummaryVM.swift in Sources */,
 				6537CF722C28375200402C77 /* TripsView.swift in Sources */,
 				654BB3352C275DC900E21B4C /* ExpenseModel.swift in Sources */,
 				6537CF782C28AE1B00402C77 /* AppDependency.swift in Sources */,
@@ -426,6 +433,7 @@
 				654BB3472C27679700E21B4C /* FileImportView.swift in Sources */,
 				6537CF7A2C28B5DC00402C77 /* TripService.swift in Sources */,
 				654BB3392C275DD300E21B4C /* TripModel.swift in Sources */,
+				6569E3E62C30193C00106286 /* ChartModel.swift in Sources */,
 				654BB2F72C27254600E21B4C /* myTabiApp.swift in Sources */,
 				6537CF7E2C28B5EB00402C77 /* DriverService.swift in Sources */,
 				6537CF9E2C2A275B00402C77 /* AuthView.swift in Sources */,

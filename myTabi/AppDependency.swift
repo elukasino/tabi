@@ -10,15 +10,20 @@ import Firebase
 import FirebaseFirestore
 
 final class AppDependency {
-    static let shared = AppDependency()
+    static let shared = AppDependency() //TODO: rozdíl mezi shared a globální proměnnou
 
     //let authVM: AuthVM
     let fireStoreDb: Firestore
+    lazy var csvParser: CSVParser = CSVParser()
     
-    lazy var csvParser = CSVParser()
-    lazy var tripService: TripService = { TripService(csvParser: csvParser, fireStoreDb: fireStoreDb) } ()
-    lazy var expenseService: ExpenseService = { ExpenseService(fireStoreDb: fireStoreDb) } ()
-    lazy var driverService: DriverService = { DriverService(fireStoreDb: fireStoreDb) } ()
+    lazy var summaryVM: SummaryVM = SummaryVM(dependencies: .init(tripVM: tripVM, expenseVM: expenseVM, driverVM: driverVM))
+    lazy var tripVM: TripVM = TripVM(dependencies: .init(tripService: tripService))
+    lazy var expenseVM: ExpenseVM = ExpenseVM(dependencies: .init(expenseService: expenseService))
+    lazy var driverVM: DriverVM = DriverVM(dependencies: .init(tripVM: tripVM, tripService: tripService, driverService: driverService))
+    
+    lazy var tripService: TripService = TripService(dependencies: .init(csvParser: csvParser, db: fireStoreDb))
+    lazy var expenseService: ExpenseService = ExpenseService(dependencies: .init(db: fireStoreDb))
+    lazy var driverService: DriverService = DriverService(dependencies: .init(db: fireStoreDb))
     
     init() {
         //self.authVM = AuthVM()

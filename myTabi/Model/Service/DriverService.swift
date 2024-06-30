@@ -9,11 +9,13 @@ import Foundation
 import FirebaseFirestore
 
 class DriverService {
-    private let db: Firestore
-    //TODO: implement timeout
+    struct Dependencies {
+        let db: Firestore
+    }
+    private let db: Firestore //TODO: implement timeout
     
-    init(fireStoreDb: Firestore) {
-        self.db = fireStoreDb
+    init(dependencies: Dependencies) {
+        db = dependencies.db
     }
     
     func fetchAllDrivers() async throws -> [Driver] {

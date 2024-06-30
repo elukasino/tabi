@@ -23,10 +23,9 @@ struct TripView: View {
     
     var body: some View {
         NavigationStack {
-            LazyVStack(alignment: .leading) {
+            VStack(alignment: .leading) {
                 MapView(startLocation: trip.startLocation, endLocation: trip.endLocation)
                 .frame(height: 150)
-                .clipShape(CustomRoundedRectangle(corners: [.topLeft, .topRight], radius: 20))
                 HStack(alignment: .top) {
                     VStack(alignment: .leading) {
                         Text("Start")
@@ -80,12 +79,14 @@ struct TripView: View {
                         }
                         .pickerStyle(.segmented)
                     } else {
+                        Spacer()
                         Picker("Driver", selection: $selectedDriver) {
                             ForEach(driverVM.drivers) { driver in
                                 Text(driver.firstName + " " + driver.lastName).tag(driver.id)
                             }
                         }
                         .pickerStyle(.menu)
+                        Spacer()
                     }
                 }
                 .onChange(of: selectedDriver, {
@@ -96,6 +97,7 @@ struct TripView: View {
                 })
                 .padding()
             } //VStack ends here
+            .clipShape(RoundedRectangle(cornerRadius: 20))
             .background(RoundedRectangle(cornerRadius: 20)
                 .fill(colorScheme == .light ? .white : Color(red: 0.15, green: 0.15, blue: 0.15))
                 .shadow(color: colorScheme == .light ? .black.opacity(0.2) : .white.opacity(0.25), radius: 8.0))
@@ -104,22 +106,8 @@ struct TripView: View {
     }
 }
 
-struct CustomRoundedRectangle: Shape {
-    var corners: UIRectCorner = .allCorners
-    var radius: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
-    }
-}
-
 #Preview {
     TripView(trip: Trip(startDateTime: Date(timeIntervalSinceNow: 0), endDateTime: Date(timeIntervalSinceNow: 2000), originalTimeZone: TimeZone.current, startLocation: Location(address: "Thákurova 9, Praha", coordinate: CLLocationCoordinate2D(latitude: 50.105050295798094, longitude: 14.389895002767982)), endLocation: Location(address: "Dlouhá, Veleň", coordinate: CLLocationCoordinate2D(latitude: 50.17556417431436, longitude: 14.553697441650922)), distance: 250.6))
-        .environmentObject(TripVM(tripService: AppDependency.shared.tripService))
-        .environmentObject(DriverVM(driverService: AppDependency.shared.driverService))
+        .environmentObject(TripVM(dependencies: .init(tripService: AppDependency.shared.tripService)))
+        .environmentObject(DriverVM(dependencies: .init(tripVM: AppDependency.shared.tripVM, tripService: AppDependency.shared.tripService, driverService: AppDependency.shared.driverService)))
 }

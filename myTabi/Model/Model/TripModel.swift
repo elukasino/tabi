@@ -8,7 +8,11 @@
 import Foundation
 import MapKit
 
-struct Trip: Identifiable {
+struct Trip: Identifiable, Equatable {
+    static func == (lhs: Trip, rhs: Trip) -> Bool {
+        return lhs.id == rhs.id && lhs.driverId == rhs.driverId
+    }
+    
     var id: String = UUID().uuidString
     var startDateTime: Date
     var endDateTime: Date

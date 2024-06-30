@@ -11,12 +11,16 @@ import CoreLocation
 import MapKit
 
 class TripService {
+    struct Dependencies {
+        let csvParser: CSVParser
+        let db: Firestore
+    }
     private let csvParser: CSVParser
     private let db: Firestore
 
-    init(csvParser: CSVParser, fireStoreDb: Firestore) {
-        self.csvParser = csvParser
-        self.db = fireStoreDb
+    init(dependencies: Dependencies) {
+        csvParser = dependencies.csvParser
+        db = dependencies.db
     }
 
     func loadTrips(fileUrl: URL) throws -> [Trip] {
@@ -36,6 +40,9 @@ class TripService {
             let startTimestamp = document["startDateTime"] as? Timestamp
             let endTimestamp = document["endDateTime"] as? Timestamp
             
+            let driverIdString: String = document["driverId"] as? String ?? ""
+            let driverId: String? = driverIdString.isEmpty ? nil : driverIdString
+            
             return Trip(id: document.documentID,
                         startDateTime: startTimestamp?.dateValue() ?? Date(), //TODO: coalescing to current date
                         endDateTime: endTimestamp?.dateValue() ?? Date(),
@@ -43,7 +50,7 @@ class TripService {
                         startLocation: Location(address: startAddress, coordinate: CLLocationCoordinate2D(latitude: startCoordinates.latitude, longitude: startCoordinates.longitude)),
                         endLocation: Location(address: endAddress, coordinate: CLLocationCoordinate2D(latitude: endCoordinates.latitude, longitude: endCoordinates.longitude)),
                         distance: document["distance"] as? Double ?? 0.0,
-                        driverId: document["driverId"] as? String ?? nil)
+                        driverId: driverId)
         }
     }
     
@@ -76,6 +83,14 @@ class TripService {
     func deleteAllTrips(trips: [Trip]) async throws {
         for trip in trips { //TODO: add batch deleting
             try await db.collection("trips").document(trip.id).delete()
+        }
+    }
+    
+    func deleteDriverIdFromTrips(driverId: String, trips: [Trip]) async throws {
+        for trip in trips {
+            if trip.driverId == driverId {
+                try await db.collection("trips").document(trip.id).setData(["driverId" : ""], merge: true)
+            }
         }
     }
 

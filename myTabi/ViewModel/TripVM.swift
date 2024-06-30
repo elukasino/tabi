@@ -8,21 +8,22 @@
 import Foundation
 
 final class TripVM: ObservableObject {
+    struct Dependencies {
+        let tripService: TripService
+    }
     private let tripService: TripService
-    @Published var trips: [Trip] = []
     
+    @Published var trips: [Trip] = []
     @Published var errorOccurred: Bool = false
     @Published var errorMessage: String?
     @Published var isLoading = false
-    
     @Published var duplicateFound: Bool = false
     private var alertContinuation: CheckedContinuation<Bool, Never>?
+    private let dateFormatter = DateFormatter()
+    private let timeFormatter = DateFormatter()
     
-    let dateFormatter = DateFormatter()
-    let timeFormatter = DateFormatter()
-    
-    init(tripService: TripService) {
-        self.tripService = tripService
+    init(dependencies: Dependencies) {
+        tripService = dependencies.tripService
         dateFormatter.dateStyle = .short
         timeFormatter.timeStyle = .short
     }

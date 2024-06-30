@@ -8,15 +8,18 @@
 import Foundation
 
 final class ExpenseVM: ObservableObject {
+    struct Dependencies {
+        let expenseService: ExpenseService
+    }
     private let expenseService: ExpenseService
-    @Published var expenses: [Expense] = []
     
+    @Published var expenses: [Expense] = []
     @Published var errorOccurred: Bool = false
     @Published var errorMessage: String?
     @Published var isLoading = false
     
-    init(expenseService: ExpenseService) {
-        self.expenseService = expenseService
+    init(dependencies: Dependencies) {
+        expenseService = dependencies.expenseService
     }
     
     @MainActor
@@ -33,11 +36,11 @@ final class ExpenseVM: ObservableObject {
     }
     
     @MainActor
-    func createExpense(description: String? = nil, amount: String, type: ExpenseType) async {
+    func createExpense(description: String? = nil, amountString: String, type: ExpenseType) async {
         isLoading = true
         defer { isLoading = false }
         do {
-            try await expenseService.createExpense(description: description, amount: Double(amount)!, type: type) //TODO: Forced-unwrap
+            try await expenseService.createExpense(description: description, amount: convertToDouble(amountString)!, type: type) //TODO: Forced-unwrap
             await fetchAllExpenses()
         } catch {
             self.errorMessage = error.localizedDescription

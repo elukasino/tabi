@@ -102,6 +102,6 @@ struct TripsView: View {
 
 #Preview {
     TripsView()
-        .environmentObject(TripVM(tripService: AppDependency.shared.tripService))
-        .environmentObject(DriverVM(driverService: AppDependency.shared.driverService))
+        .environmentObject(TripVM(dependencies: .init(tripService: AppDependency.shared.tripService)))
+        .environmentObject(DriverVM(dependencies: .init(tripVM: AppDependency.shared.tripVM, tripService: AppDependency.shared.tripService, driverService: AppDependency.shared.driverService)))
 }

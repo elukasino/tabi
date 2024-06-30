@@ -261,5 +261,5 @@ struct EditDriverView: View {
 
 #Preview {
     DriversView()
-        .environmentObject(DriverVM(driverService: AppDependency.shared.driverService))
+        .environmentObject(DriverVM(dependencies: .init(tripVM: AppDependency.shared.tripVM, tripService: AppDependency.shared.tripService, driverService: AppDependency.shared.driverService)))
 }
