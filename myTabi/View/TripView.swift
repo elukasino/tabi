@@ -68,39 +68,44 @@ struct TripView: View {
                             .font(.callout)
                     }
                 }
-                .padding([.leading, .trailing])
+                .padding(.horizontal)
                 .padding(.top, 4)
+                .padding(.bottom, 8)
                 Group {
-                    if driverVM.drivers.count < 6 {
-                        Picker("Driver", selection: $selectedDriver) {
-                            ForEach(driverVM.drivers) { driver in
-                                Text(driver.firstName.isEmpty ? driver.lastName : driver.firstName).tag(driver.id)
-                            }
-                        }
-                        .pickerStyle(.segmented)
+                    if driverVM.drivers.isEmpty {
+                        EmptyView()
                     } else {
-                        Spacer()
-                        Picker("Driver", selection: $selectedDriver) {
-                            ForEach(driverVM.drivers) { driver in
-                                Text(driver.firstName + " " + driver.lastName).tag(driver.id)
+                        Group {
+                            if driverVM.drivers.count < 6 {
+                                Picker("Driver", selection: $selectedDriver) {
+                                    ForEach(driverVM.drivers) { driver in
+                                        Text(driver.firstName.isEmpty ? driver.lastName : driver.firstName).tag(driver.id)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                            } else {
+                                Spacer()
+                                Picker("Driver", selection: $selectedDriver) {
+                                    ForEach(driverVM.drivers) { driver in
+                                        Text(driver.firstName + " " + driver.lastName).tag(driver.id)
+                                    }
+                                }
+                                .pickerStyle(.menu)
+                                Spacer()
                             }
                         }
-                        .pickerStyle(.menu)
-                        Spacer()
+                        .onChange(of: selectedDriver, {
+                            Task {
+                                trip.driverId = selectedDriver
+                                await tripVM.updateTripDriver(trip)
+                            }
+                        })
+                        .padding(.horizontal)
+                        .padding(.bottom)
                     }
                 }
-                .onChange(of: selectedDriver, {
-                    Task {
-                        trip.driverId = selectedDriver
-                        await tripVM.updateTripDriver(trip)
-                    }
-                })
-                .padding()
             } //VStack ends here
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .background(RoundedRectangle(cornerRadius: 20)
-                .fill(colorScheme == .light ? .white : Color(red: 0.15, green: 0.15, blue: 0.15))
-                .shadow(color: colorScheme == .light ? .black.opacity(0.2) : .white.opacity(0.25), radius: 8.0))
+            .customContainerStyle()
             .padding()
         }
     }

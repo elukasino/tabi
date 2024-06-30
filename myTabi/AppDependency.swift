@@ -12,7 +12,7 @@ import FirebaseFirestore
 final class AppDependency {
     static let shared = AppDependency() //TODO: rozdíl mezi shared a globální proměnnou
 
-    //let authVM: AuthVM
+    let authVM: AuthVM
     let fireStoreDb: Firestore
     lazy var csvParser: CSVParser = CSVParser()
     
@@ -26,7 +26,7 @@ final class AppDependency {
     lazy var driverService: DriverService = DriverService(dependencies: .init(db: fireStoreDb))
     
     init() {
-        //self.authVM = AuthVM()
+        self.authVM = AuthVM()
         self.fireStoreDb = Firestore.firestore()
     }
 }

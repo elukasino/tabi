@@ -18,7 +18,7 @@ struct TripsView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack {
+                LazyVStack {
                     if tripVM.trips.isEmpty {
                         Rectangle().opacity(0)
                     } else {

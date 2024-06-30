@@ -20,12 +20,7 @@ struct ContentView: View {
     @StateObject var driverVM: DriverVM
     //@StateObject var authVM: AuthVM
     
-    init(dependencies: Dependencies) {
-        /*_tripVM = StateObject(wrappedValue: TripVM(tripService: AppDependency.shared.tripService))
-        _expenseVM = StateObject(wrappedValue: ExpenseVM(expenseService: AppDependency.shared.expenseService))
-        _driverVM = StateObject(wrappedValue: DriverVM(driverService: AppDependency.shared.driverService))
-        _authVM = StateObject(wrappedValue: appDependency.authVM)*/
-        
+    init(dependencies: Dependencies) {        
         _summaryVM = StateObject(wrappedValue: dependencies.summaryVM)
         _tripVM = StateObject(wrappedValue: dependencies.tripVM)
         _expenseVM = StateObject(wrappedValue: dependencies.expenseVM)
