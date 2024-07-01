@@ -14,12 +14,14 @@ class DriverService {
     }
     private let db: Firestore //TODO: implement timeout
     
+    private let path = "drivers"
+    
     init(dependencies: Dependencies) {
         db = dependencies.db
     }
     
-    func fetchAllDrivers() async throws -> [Driver] {
-        let snapshot = try await db.collection("drivers").order(by: "timestamp").getDocuments()
+    func fetchAllDrivers(test: Bool = false) async throws -> [Driver] {
+        let snapshot = try await db.collection(test ? path+"Test" : path).order(by: "timestamp").getDocuments()
         return snapshot.documents.compactMap { document in
             Driver(id: document.documentID,
                    firstName: document["firstName"] as? String ?? "",
@@ -28,23 +30,23 @@ class DriverService {
         }
     }
     
-    func createDriver(firstName: String, lastName: String, usualLocations : [String] = []) async throws {
-        try await db.collection("drivers").addDocument(data: ["firstName" : firstName, "lastName" : lastName, "timestamp" : Date()])
+    func createDriver(firstName: String, lastName: String, usualLocations : [String] = [], test: Bool = false) async throws {
+        try await db.collection(test ? path+"Test" : path).addDocument(data: ["firstName" : firstName, "lastName" : lastName, "timestamp" : Date()])
     }
     
-    func updateDriver(driverToUpdate: Driver) async throws {
-        try await db.collection("drivers").document(driverToUpdate.id).setData(["firstName" : driverToUpdate.firstName,
+    func updateDriver(driverToUpdate: Driver, test: Bool = false) async throws {
+        try await db.collection(test ? path+"Test" : path).document(driverToUpdate.id).setData(["firstName" : driverToUpdate.firstName,
                                                                                 "lastName" : driverToUpdate.lastName,
                                                                                 "usualLocations" : driverToUpdate.usualLocations], merge: true)
     }
     
-    func deleteDriver(driverId: String) async throws {
-        try await db.collection("drivers").document(driverId).delete()
+    func deleteDriver(driverId: String, test: Bool = false) async throws {
+        try await db.collection(test ? path+"Test" : path).document(driverId).delete()
     }
     
-    func deleteAllDrivers(drivers: [Driver]) async throws {
+    func deleteAllDrivers(drivers: [Driver], test: Bool = false) async throws {
         for driver in drivers { //TODO: add batch deleting
-            try await db.collection("drivers").document(driver.id).delete()
+            try await db.collection(test ? path+"Test" : path).document(driver.id).delete()
         }
     }
 }

@@ -17,6 +17,8 @@ class TripService {
     }
     private let csvParser: CSVParser
     private let db: Firestore
+    
+    private let path = "trips"
 
     init(dependencies: Dependencies) {
         csvParser = dependencies.csvParser
@@ -29,8 +31,8 @@ class TripService {
     
     //Firestore methods==============================================================
     
-    func fetchAllTrips() async throws -> [Trip] {
-        let snapshot = try await db.collection("trips").order(by: "startDateTime").getDocuments()
+    func fetchAllTrips(test: Bool = false) async throws -> [Trip] {
+        let snapshot = try await db.collection(test ? path+"Test" : path).order(by: "startDateTime").getDocuments()
         return snapshot.documents.compactMap { document in
             let startAddress: String = document["startAddress"] as? String ?? ""
             let endAddress: String = document["endAddress"] as? String ?? ""
@@ -55,13 +57,13 @@ class TripService {
     }
     
     func createTrip(startDateTime: Date, endDateTime: Date, originalTimeZone: TimeZone, startAddress: String, endAddress: String,
-                    distance: Double, driverId: String?) async throws {
+                    distance: Double, driverId: String?, test: Bool = false) async throws {
         let startCoordinates: CLLocationCoordinate2D = try await convertAddressToCoordinates(address: startAddress) ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
         let endCoordinates: CLLocationCoordinate2D = try await convertAddressToCoordinates(address: endAddress) ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
         
         let originalTimeZoneAbbr = originalTimeZone.abbreviation()
         
-        try await db.collection("trips").addDocument(data: ["startDateTime" : startDateTime,
+        try await db.collection(test ? path+"Test" : path).addDocument(data: ["startDateTime" : startDateTime,
                                                             "endDateTime" : endDateTime,
                                                             "originalTimeZone": originalTimeZoneAbbr ?? "",
                                                             "startAddress" : startAddress,
@@ -72,29 +74,29 @@ class TripService {
                                                             "driverId" : driverId ?? ""])
     }
     
-    func updateTripDriver(tripToUpdate: Trip) async throws {
-        try await db.collection("trips").document(tripToUpdate.id).setData(["driverId" : tripToUpdate.driverId ?? ""], merge: true)
+    func updateTripDriver(tripToUpdate: Trip, test: Bool = false) async throws {
+        try await db.collection(test ? path+"Test" : path).document(tripToUpdate.id).setData(["driverId" : tripToUpdate.driverId ?? ""], merge: true)
     }
     
-    func deleteTrip(tripId: String) async throws {
-        try await db.collection("trips").document(tripId).delete()
+    func deleteTrip(tripId: String, test: Bool = false) async throws {
+        try await db.collection(test ? path+"Test" : path).document(tripId).delete()
     }
     
-    func deleteAllTrips(trips: [Trip]) async throws {
+    func deleteAllTrips(trips: [Trip], test: Bool = false) async throws {
         for trip in trips { //TODO: add batch deleting
-            try await db.collection("trips").document(trip.id).delete()
+            try await db.collection(test ? path+"Test" : path).document(trip.id).delete()
         }
     }
     
-    func deleteDriverIdFromTrips(driverId: String, trips: [Trip]) async throws {
+    func deleteDriverIdFromTrips(driverId: String, trips: [Trip], test: Bool = false) async throws {
         for trip in trips {
             if trip.driverId == driverId {
-                try await db.collection("trips").document(trip.id).setData(["driverId" : ""], merge: true)
+                try await db.collection(test ? path+"Test" : path).document(trip.id).setData(["driverId" : ""], merge: true)
             }
         }
     }
 
-    func convertAddressToCoordinates(address: String) async throws -> CLLocationCoordinate2D? { //ASYNC AWAIT
+    func convertAddressToCoordinates(address: String, test: Bool = false) async throws -> CLLocationCoordinate2D? { //ASYNC AWAIT
         let geocoder = CLGeocoder()
         return try await withCheckedThrowingContinuation { continuation in
             geocoder.geocodeAddressString(address) { placemarks, error in
