@@ -10,7 +10,7 @@ import Firebase
 import FirebaseFirestore
 
 final class AppDependency {
-    static let shared = AppDependency() //TODO: rozdíl mezi shared a globální proměnnou
+    static let shared = AppDependency() //FIXME: rozdíl mezi shared a globální proměnnou
 
     let authVM: AuthVM
     let fireStoreDb: Firestore

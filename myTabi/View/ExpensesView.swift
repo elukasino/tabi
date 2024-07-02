@@ -28,7 +28,11 @@ struct ExpensesView: View {
                         NavigationLink {
                             EditExpenseView(expense: expense)
                         } label: {
-                            Text(expense.type.rawValue)
+                            HStack(spacing: 4) {
+                                Text("\(expense.type.rawValue):")
+                                Text("\(expense.amount, specifier: "%0.0f") \(Locale.current.currency?.identifier ?? "CZK")")
+                                    .foregroundStyle(.gray)
+                            }
                         }
                         .swipeActions {
                             Button("Delete", role: .destructive) {

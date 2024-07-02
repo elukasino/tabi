@@ -21,20 +21,11 @@ struct Trip: Identifiable, Equatable {
     var endLocation: Location
     var distance: Double
     var driverId: String?
+    var autoAssignedDriver: Bool
 }
 
 struct Location: Identifiable {
     var id: String = UUID().uuidString
     var address: String
     var coordinate: CLLocationCoordinate2D?
-}
-
-struct parsedTrip: Identifiable {
-    var id: String = UUID().uuidString
-    var startDateTime: String
-    var endDateTime: String
-    var startLocation: String
-    var endLocation: String
-    var distance: Double
-    var driverId: String?
 }

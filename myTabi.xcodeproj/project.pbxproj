@@ -50,6 +50,7 @@
 		65C076EC2C32D82A0098A19B /* DriverServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C076EB2C32D82A0098A19B /* DriverServiceTests.swift */; };
 		65C076EE2C32F92F0098A19B /* ExpenseServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C076ED2C32F92F0098A19B /* ExpenseServiceTests.swift */; };
 		65C076F02C32FB9F0098A19B /* TripServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C076EF2C32FB9F0098A19B /* TripServiceTests.swift */; };
+		65C076F22C331FA10098A19B /* AutoAssignDriverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C076F12C331FA00098A19B /* AutoAssignDriverView.swift */; };
 		65C442862C2C820000110A16 /* BackgroundSymbolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C442852C2C820000110A16 /* BackgroundSymbolView.swift */; };
 		65C442882C2CA51000110A16 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C442872C2CA51000110A16 /* MapView.swift */; };
 /* End PBXBuildFile section */
@@ -111,6 +112,7 @@
 		65C076EB2C32D82A0098A19B /* DriverServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriverServiceTests.swift; sourceTree = "<group>"; };
 		65C076ED2C32F92F0098A19B /* ExpenseServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExpenseServiceTests.swift; sourceTree = "<group>"; };
 		65C076EF2C32FB9F0098A19B /* TripServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripServiceTests.swift; sourceTree = "<group>"; };
+		65C076F12C331FA00098A19B /* AutoAssignDriverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoAssignDriverView.swift; sourceTree = "<group>"; };
 		65C442852C2C820000110A16 /* BackgroundSymbolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSymbolView.swift; sourceTree = "<group>"; };
 		65C442872C2CA51000110A16 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -260,6 +262,7 @@
 				653836E72C31B37900297113 /* ChartViews.swift */,
 				6537CF712C28375200402C77 /* TripsView.swift */,
 				6537CF852C29A93100402C77 /* TripView.swift */,
+				65C076F12C331FA00098A19B /* AutoAssignDriverView.swift */,
 				65C442872C2CA51000110A16 /* MapView.swift */,
 				6537CF752C28376300402C77 /* ExpensesView.swift */,
 				6537CF732C28375A00402C77 /* DriversView.swift */,
@@ -440,6 +443,7 @@
 				653836EA2C31B4B400297113 /* ContainerViewModifier.swift in Sources */,
 				654BB3352C275DC900E21B4C /* ExpenseModel.swift in Sources */,
 				6537CF782C28AE1B00402C77 /* AppDependency.swift in Sources */,
+				65C076F22C331FA10098A19B /* AutoAssignDriverView.swift in Sources */,
 				6537CF9A2C29D96100402C77 /* ExpenseVM.swift in Sources */,
 				653836EC2C320D1C00297113 /* SettingsView.swift in Sources */,
 				654BB3432C27672300E21B4C /* DriverVM.swift in Sources */,

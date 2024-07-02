@@ -173,10 +173,11 @@ struct EditDriverView: View {
     
     @State var driver: Driver
     @State var confirmationDialogPresented: Bool = false
+    @State var newAddress: String = ""
     
     @FocusState private var focusedField: FocusedField?
     enum FocusedField {
-        case firstName, lastName
+        case firstName, lastName, address
     }
     
     var body: some View {
@@ -188,6 +189,35 @@ struct EditDriverView: View {
                             .focused($focusedField, equals: .firstName)
                         TextField("Last name", text: $driver.lastName)
                             .focused($focusedField, equals: .lastName)
+                    } header: {
+                        Text("General")
+                    }
+                    Section {
+                        List {
+                            ForEach(driver.usualLocations, id: \.self) { address in
+                                Text(address) //TODO: Nelze zpětně editovat adresu
+                                    .swipeActions {
+                                        Button("Delete", role: .destructive) {
+                                            if let index = driver.usualLocations.firstIndex(where: { $0 == address }) {
+                                                driver.usualLocations.remove(at: index)
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                        TextField("New address", text: $newAddress)
+                            .focused($focusedField, equals: .address)
+                        Button {
+                            driver.usualLocations.append(newAddress)
+                            newAddress = ""
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus")
+                                Text("Add address")
+                            }
+                        }
+                    } header: {
+                        Text("Usual locations")
                     }
                     Section {
                         Button(role: .destructive, action: {
@@ -243,6 +273,10 @@ struct EditDriverView: View {
                             }
                     } else {
                         Button {
+                            if !newAddress.isEmpty {
+                                driver.usualLocations.append(newAddress)
+                                newAddress = ""
+                            }
                             Task {
                                 await driverVM.updateDriver(driver)
                             }

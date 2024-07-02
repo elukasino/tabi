@@ -83,6 +83,11 @@ final class DriverVM: ObservableObject {
     func deleteDriver(by driverId: String) async {
         isLoading = true
         defer { isLoading = false }
+        
+        if let index = drivers.firstIndex(where: { $0.id == driverId }) {
+            drivers.remove(at: index)
+        }
+        
         do {
             try await driverService.deleteDriver(driverId: driverId)
             try await tripService.deleteDriverIdFromTrips(driverId: driverId, trips: tripVM.trips) //Remove leftover driver IDs from trips

@@ -77,6 +77,11 @@ final class ExpenseVM: ObservableObject {
     func deleteExpense(by expenseId: String) async {
         isLoading = true
         defer { isLoading = false }
+        
+        if let index = expenses.firstIndex(where: { $0.id == expenseId }) {
+            expenses.remove(at: index)
+        }
+        
         do {
             try await expenseService.deleteExpense(expenseId: expenseId)
             await fetchAllExpenses()

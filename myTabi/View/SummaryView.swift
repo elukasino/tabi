@@ -10,7 +10,7 @@ import Charts
 
 struct SummaryView: View {
     @EnvironmentObject var summaryVM: SummaryVM
-    @EnvironmentObject var tripVM: TripVM //TODO: proč toto nemůžu odstranit, aby SummaryVM initovalo správně?
+    @EnvironmentObject var tripVM: TripVM //FIXME: proč toto nemůžu odstranit, aby SummaryVM initovalo správně?
     @EnvironmentObject var expenseVM: ExpenseVM
     @EnvironmentObject var driverVM: DriverVM
     

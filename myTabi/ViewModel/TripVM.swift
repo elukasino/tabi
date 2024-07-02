@@ -6,24 +6,29 @@
 //
 
 import Foundation
+import CoreLocation
 
 final class TripVM: ObservableObject {
     struct Dependencies {
         let tripService: TripService
+//        let driverVM: DriverVM
     }
     private let tripService: TripService
+//    private let driverVM: DriverVM
     
     @Published var trips: [Trip] = []
     @Published var errorOccurred: Bool = false
     @Published var errorMessage: String?
     @Published var isLoading = false
     @Published var duplicateFound: Bool = false
+    @Published var loadingProgress: Double = 0.0
     private var alertContinuation: CheckedContinuation<Bool, Never>?
     private let dateFormatter = DateFormatter()
     private let timeFormatter = DateFormatter()
     
     init(dependencies: Dependencies) {
         tripService = dependencies.tripService
+//        driverVM = dependencies.driverVM
         dateFormatter.dateStyle = .short
         timeFormatter.timeStyle = .short
     }
@@ -60,7 +65,7 @@ final class TripVM: ObservableObject {
         isLoading = true
         defer { isLoading = false }
         do {
-            try await tripService.createTrip(startDateTime: startDateTime, endDateTime: endDateTime, originalTimeZone: originalTimeZone, startAddress: startAddress, endAddress: endAddress, distance: distance, driverId: driverId)
+            try await tripService.createTrip(startDateTime: startDateTime, endDateTime: endDateTime, originalTimeZone: originalTimeZone, startAddress: startAddress, endAddress: endAddress, distance: distance, driverId: driverId, autoAssignedDriver: false)
             await fetchAllTrips()
         } catch {
             self.errorMessage = error.localizedDescription
@@ -81,9 +86,14 @@ final class TripVM: ObservableObject {
     }
     
     @MainActor
-    func updateTripDriver(_ updatedTrip: Trip) async {
+    func updateTripDriver(_ updatedTrip: Trip, doNotEndLoading: Bool = false) async {
         isLoading = true
-        defer { isLoading = false }
+        defer {
+            if !doNotEndLoading {
+                isLoading = false
+            }
+        }
+        
         do {
             try await tripService.updateTripDriver(tripToUpdate: updatedTrip)
             await fetchAllTrips()
@@ -117,6 +127,63 @@ final class TripVM: ObservableObject {
             self.errorMessage = error.localizedDescription
             errorOccurred = true
         }
+    }
+    
+    @MainActor
+    func autoAssignDrivers() async {
+        isLoading = true
+        defer {
+            isLoading = false
+            loadingProgress = 0.0
+        }
+        let geocoder = CLGeocoder()
+        
+        for tripIndex in trips.indices {
+            var candidatesFound = 0
+            var candidateId: String? = nil
+            for driver in AppDependency.shared.driverVM.drivers { //TODO: hardcoded appdependency
+                for location in driver.usualLocations {
+                    do {
+                        let locationCoordinates = try await tripService.convertAddressToCoordinatesWithContinuation(address: location, geocoder: geocoder) //Trying to conserve resources and memory by re-using geocoder instance //TODO: continuation
+                        if trips[tripIndex].startLocation.coordinate != nil && locationCoordinates != nil {
+                            var candidateFound = tripService.areLocationsClose(location1: trips[tripIndex].startLocation.coordinate!, location2: locationCoordinates!)
+                            candidatesFound += candidateFound ? 1 : 0
+                            if candidatesFound == 1 && candidateFound {
+                                candidateId = driver.id
+                                break
+                            }
+                        }
+                        if trips[tripIndex].endLocation.coordinate != nil && locationCoordinates != nil {
+                            var candidateFound = tripService.areLocationsClose(location1: trips[tripIndex].startLocation.coordinate!, location2: locationCoordinates!)
+                            candidatesFound += candidateFound ? 1 : 0
+                            if candidatesFound == 1 && candidateFound {
+                                candidateId = driver.id
+                                break
+                            }
+                        }
+                    } catch {
+                        self.errorMessage = error.localizedDescription
+                        errorOccurred = true
+                    }
+                }
+            }
+            if candidatesFound == 1 && candidateId != nil {
+                trips[tripIndex].driverId = candidateId
+                trips[tripIndex].autoAssignedDriver = true
+                await updateTripDriver(trips[tripIndex], doNotEndLoading: true)
+            }
+            loadingProgress = Double(tripIndex+1)
+            
+            /*do {
+                print("sleeping now")
+                try await Task.sleep(nanoseconds: 1000000000)
+            } catch {
+                
+            }*/
+//            print("sleeping now")
+//            sleep(1000)
+        }
+        await fetchAllTrips()
     }
     
     @MainActor

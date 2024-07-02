@@ -115,11 +115,11 @@ final class SummaryVM: ObservableObject {
             for indexDE in chartDriversExpenseData.indices {
                 for indexDD in chartDriversDistanceData.indices {
                     if chartDriversExpenseData[indexDE].driver.id == chartDriversDistanceData[indexDD].driver.id {
-                        if tripVM.trips.isEmpty {
+                        if tripVM.trips.isEmpty && driverVM.drivers.count > 0 { //TODO: mozne deleni nulou
                             chartDriversExpenseData[indexDE].expense = (totalExpenses  / Double(driverVM.drivers.count))
-                        } else if calculateAllExpensesEqually {
+                        } else if calculateAllExpensesEqually && totalDistance > 0 && driverVM.drivers.count != 0 { //TODO: mozne deleni nulou
                             chartDriversExpenseData[indexDE].expense = (totalExpenses / totalDistance) * (chartDriversDistanceData[indexDD].distance + (unassignedDistance / Double(driverVM.drivers.count)))
-                        } else {
+                        } else if totalDistance != 0 && driverVM.drivers.count > 0 { //TODO: mozne deleni nulou
                             chartDriversExpenseData[indexDE].expense = ((totalFuelExpenses / totalDistance) * (chartDriversDistanceData[indexDD].distance + (unassignedDistance / Double(driverVM.drivers.count))) + ((totalExpenses-totalFuelExpenses) / Double(driverVM.drivers.count)))
                         }
                     }

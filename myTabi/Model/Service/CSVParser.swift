@@ -48,7 +48,7 @@ class CSVParser {
                 let originalTimeZone: TimeZone = TimeZone(iso8601String: row[startDateTimeColumn]) ?? TimeZone.current
                 
                 let distance = convertToDouble(row[distanceColumn]) ?? 0.0
-                let trip = Trip(startDateTime: startDateTime, endDateTime: endDateTime, originalTimeZone: originalTimeZone, startLocation: startLocation, endLocation: endLocation, distance: distance)
+                let trip = Trip(startDateTime: startDateTime, endDateTime: endDateTime, originalTimeZone: originalTimeZone, startLocation: startLocation, endLocation: endLocation, distance: distance, autoAssignedDriver: false)
                 trips.append(trip)
             }
         } catch let parseError as CSVParseError {

@@ -25,7 +25,7 @@ struct myTabiApp: App {
         Task {
             await AppDependency.shared.expenseVM.fetchAllExpenses()
             await AppDependency.shared.driverVM.fetchAllDrivers()
-            await AppDependency.shared.tripVM.fetchAllTrips() //TODO: zde nebo v AppDependency nebo v onAppear ContentView?
+            await AppDependency.shared.tripVM.fetchAllTrips() //FIXME: zde nebo v AppDependency nebo v onAppear ContentView?
         }
     }
         

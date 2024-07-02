@@ -31,13 +31,13 @@ class DriverService {
     }
     
     func createDriver(firstName: String, lastName: String, usualLocations : [String] = [], test: Bool = false) async throws {
-        try await db.collection(test ? path+"Test" : path).addDocument(data: ["firstName" : firstName, "lastName" : lastName, "timestamp" : Date()])
+        try await db.collection(test ? path+"Test" : path).addDocument(data: ["firstName" : firstName, "lastName" : lastName, "timestamp" : Date(), "usualLocations" : usualLocations])
     }
     
     func updateDriver(driverToUpdate: Driver, test: Bool = false) async throws {
         try await db.collection(test ? path+"Test" : path).document(driverToUpdate.id).setData(["firstName" : driverToUpdate.firstName,
-                                                                                "lastName" : driverToUpdate.lastName,
-                                                                                "usualLocations" : driverToUpdate.usualLocations], merge: true)
+                                                                                                "lastName" : driverToUpdate.lastName,
+                                                                                                "usualLocations" : driverToUpdate.usualLocations], merge: true)
     }
     
     func deleteDriver(driverId: String, test: Bool = false) async throws {

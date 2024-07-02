@@ -14,12 +14,24 @@ struct TripView: View {
     @Environment(\.colorScheme) var colorScheme
     
     @State var trip: Trip
+//    @Binding var trip: Trip
     @State var selectedDriver: String
+    @State var selectedDriverDemo: String
+    var demoOnly: Bool
     
-    init(trip: Trip) {
+    init(trip: Trip, demoOnly: Bool = false) {
         _trip = State(initialValue: trip)
         _selectedDriver = State(initialValue: trip.driverId ?? "")
+        _selectedDriverDemo = State(initialValue: "Steve")
+        self.demoOnly = demoOnly
     }
+    
+//    init(trip: Binding<Trip>, demoOnly: Bool = false) {
+//        self._trip = trip
+//        _selectedDriver = State(initialValue: trip.wrappedValue.driverId ?? "")
+//        _selectedDriverDemo = State(initialValue: "Steve")
+//        self.demoOnly = demoOnly
+//    }
     
     var body: some View {
         NavigationStack {
@@ -53,6 +65,9 @@ struct TripView: View {
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 90)
                             .opacity(0.4)
+                        Image(systemName: (trip.autoAssignedDriver || demoOnly) ? "wand.and.stars" : "")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.gray, .orange)
                     }
                     .padding(.top)
                     Spacer()
@@ -72,7 +87,16 @@ struct TripView: View {
                 .padding(.top, 4)
                 .padding(.bottom, 8)
                 Group {
-                    if driverVM.drivers.isEmpty {
+                    if demoOnly {
+                        Picker("Driver", selection: $selectedDriverDemo) {
+                            ForEach(["Steve", "Tim", "Jony"], id: \.self) { driver in
+                                Text(driver).tag(driver)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+                        .padding(.bottom)
+                    } else if driverVM.drivers.isEmpty {
                         EmptyView()
                     } else {
                         Group {
@@ -106,13 +130,12 @@ struct TripView: View {
                 }
             } //VStack ends here
             .customContainerStyle()
-            .padding()
         }
     }
 }
 
 #Preview {
-    TripView(trip: Trip(startDateTime: Date(timeIntervalSinceNow: 0), endDateTime: Date(timeIntervalSinceNow: 2000), originalTimeZone: TimeZone.current, startLocation: Location(address: "Thákurova 9, Praha", coordinate: CLLocationCoordinate2D(latitude: 50.105050295798094, longitude: 14.389895002767982)), endLocation: Location(address: "Dlouhá, Veleň", coordinate: CLLocationCoordinate2D(latitude: 50.17556417431436, longitude: 14.553697441650922)), distance: 250.6))
+    TripView(trip: Trip(startDateTime: Date(timeIntervalSinceNow: 0), endDateTime: Date(timeIntervalSinceNow: 2000), originalTimeZone: TimeZone.current, startLocation: Location(address: "Thákurova 9, Praha", coordinate: CLLocationCoordinate2D(latitude: 50.105050295798094, longitude: 14.389895002767982)), endLocation: Location(address: "Dlouhá, Veleň", coordinate: CLLocationCoordinate2D(latitude: 50.17556417431436, longitude: 14.553697441650922)), distance: 250.6, autoAssignedDriver: false))
         .environmentObject(TripVM(dependencies: .init(tripService: AppDependency.shared.tripService)))
         .environmentObject(DriverVM(dependencies: .init(tripVM: AppDependency.shared.tripVM, tripService: AppDependency.shared.tripService, driverService: AppDependency.shared.driverService)))
 }

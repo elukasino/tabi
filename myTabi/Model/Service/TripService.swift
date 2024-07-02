@@ -52,14 +52,16 @@ class TripService {
                         startLocation: Location(address: startAddress, coordinate: CLLocationCoordinate2D(latitude: startCoordinates.latitude, longitude: startCoordinates.longitude)),
                         endLocation: Location(address: endAddress, coordinate: CLLocationCoordinate2D(latitude: endCoordinates.latitude, longitude: endCoordinates.longitude)),
                         distance: document["distance"] as? Double ?? 0.0,
-                        driverId: driverId)
+                        driverId: driverId,
+                        autoAssignedDriver: document["autoAssignedDriver"] as? Bool ?? false
+            )
         }
     }
     
     func createTrip(startDateTime: Date, endDateTime: Date, originalTimeZone: TimeZone, startAddress: String, endAddress: String,
-                    distance: Double, driverId: String?, test: Bool = false) async throws {
-        let startCoordinates: CLLocationCoordinate2D = try await convertAddressToCoordinates(address: startAddress) ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
-        let endCoordinates: CLLocationCoordinate2D = try await convertAddressToCoordinates(address: endAddress) ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
+                    distance: Double, driverId: String?, autoAssignedDriver: Bool, test: Bool = false) async throws {
+        let startCoordinates: CLLocationCoordinate2D = try await convertAddressToCoordinatesWithContinuation(address: startAddress) ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
+        let endCoordinates: CLLocationCoordinate2D = try await convertAddressToCoordinatesWithContinuation(address: endAddress) ?? CLLocationCoordinate2D(latitude: 0, longitude: 0)
         
         let originalTimeZoneAbbr = originalTimeZone.abbreviation()
         
@@ -71,11 +73,12 @@ class TripService {
                                                             "startCoordinates" : GeoPoint(latitude: startCoordinates.latitude, longitude: startCoordinates.longitude),
                                                             "endCoordinates" : GeoPoint(latitude: endCoordinates.latitude, longitude: endCoordinates.longitude),
                                                             "distance" : distance,
-                                                            "driverId" : driverId ?? ""])
+                                                            "driverId" : driverId ?? "",
+                                                            "autoAssignedDriver" : autoAssignedDriver])
     }
     
     func updateTripDriver(tripToUpdate: Trip, test: Bool = false) async throws {
-        try await db.collection(test ? path+"Test" : path).document(tripToUpdate.id).setData(["driverId" : tripToUpdate.driverId ?? ""], merge: true)
+        try await db.collection(test ? path+"Test" : path).document(tripToUpdate.id).setData(["driverId" : tripToUpdate.driverId ?? "", "autoAssignedDriver" : tripToUpdate.autoAssignedDriver], merge: true)
     }
     
     func deleteTrip(tripId: String, test: Bool = false) async throws {
@@ -91,13 +94,12 @@ class TripService {
     func deleteDriverIdFromTrips(driverId: String, trips: [Trip], test: Bool = false) async throws {
         for trip in trips {
             if trip.driverId == driverId {
-                try await db.collection(test ? path+"Test" : path).document(trip.id).setData(["driverId" : ""], merge: true)
+                try await db.collection(test ? path+"Test" : path).document(trip.id).setData(["driverId" : "", "autoAssignedDriver" : false], merge: true)
             }
         }
     }
 
-    func convertAddressToCoordinates(address: String, test: Bool = false) async throws -> CLLocationCoordinate2D? { //ASYNC AWAIT
-        let geocoder = CLGeocoder()
+    func convertAddressToCoordinatesWithContinuation(address: String, geocoder: CLGeocoder = CLGeocoder()) async throws -> CLLocationCoordinate2D? {
         return try await withCheckedThrowingContinuation { continuation in
             geocoder.geocodeAddressString(address) { placemarks, error in
                 if let error = error {
@@ -114,5 +116,30 @@ class TripService {
             }
         }
     }
-
+    
+    func convertAddressToCoordinates(address: String, geocoder: CLGeocoder = CLGeocoder(), completion: @escaping (CLLocationCoordinate2D?) -> Void) {
+        geocoder.geocodeAddressString(address) { placemarks, error in
+            if let error = error {
+                print("Error geocoding address: \(error)")
+                completion(nil)
+                return
+            }
+            
+            guard let location = placemarks?.first?.location else {
+                completion(nil)
+                return
+            }
+            
+            completion(location.coordinate)
+        }
+    }
+    
+    func areLocationsClose(location1: CLLocationCoordinate2D, location2: CLLocationCoordinate2D, thresholdInMeters: Int = 500) -> Bool {
+        let loc1 = CLLocation(latitude: location1.latitude, longitude: location1.longitude)
+        let loc2 = CLLocation(latitude: location2.latitude, longitude: location2.longitude)
+        
+        let distanceInMeters = loc1.distance(from: loc2)
+        
+        return distanceInMeters < Double(thresholdInMeters)
+    }
 }

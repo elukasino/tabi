@@ -33,7 +33,7 @@ class TripServiceTests: XCTestCase {
         let startCoordinates = GeoPoint(latitude: 1, longitude: 1)
         let endCoordinates = GeoPoint(latitude: 2, longitude: 2)
         let commonDateTime = Date()
-        let docRef = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": commonDateTime, "endDateTime": commonDateTime, "distance": 100.0, "originalTimeZone": "GMT+2"])
+        let docRef = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": commonDateTime, "endDateTime": commonDateTime, "distance": 100.0, "originalTimeZone": "GMT+2", "autoAssignedDriver" : false])
         
         // When
         let trips = try await tripService.fetchAllTrips(test: true)
@@ -67,7 +67,7 @@ class TripServiceTests: XCTestCase {
         let driverId = "driver123"
         
         // When
-        try await tripService.createTrip(startDateTime: startDateTime, endDateTime: endDateTime, originalTimeZone: originalTimeZone, startAddress: startAddress, endAddress: endAddress, distance: distance, driverId: driverId, test: true)
+        try await tripService.createTrip(startDateTime: startDateTime, endDateTime: endDateTime, originalTimeZone: originalTimeZone, startAddress: startAddress, endAddress: endAddress, distance: distance, driverId: driverId, autoAssignedDriver: false, test: true)
         
         // Then
         let snapshot = try await firestore.collection("tripsTest").getDocuments()
@@ -89,10 +89,10 @@ class TripServiceTests: XCTestCase {
         // Given
         let startCoordinates = GeoPoint(latitude: 1, longitude: 1)
         let endCoordinates = GeoPoint(latitude: 2, longitude: 2)
-        let docRef = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 100.0, "originalTimeZone": "GMT+2", "driverId": "driver123"])
+        let docRef = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 100.0, "originalTimeZone": "GMT+2", "driverId": "driver123", "autoAssignedDriver" : false])
         
         // When
-        let tripToUpdate = Trip(id: docRef.documentID, startDateTime: Date(), endDateTime: Date(), originalTimeZone: TimeZone.current, startLocation: Location(address: "Praha", coordinate: CLLocationCoordinate2D(latitude: 1, longitude: 1)), endLocation: Location(address: "Brno", coordinate: CLLocationCoordinate2D(latitude: 2, longitude: 2)), distance: 100.0, driverId: "driver456")
+        let tripToUpdate = Trip(id: docRef.documentID, startDateTime: Date(), endDateTime: Date(), originalTimeZone: TimeZone.current, startLocation: Location(address: "Praha", coordinate: CLLocationCoordinate2D(latitude: 1, longitude: 1)), endLocation: Location(address: "Brno", coordinate: CLLocationCoordinate2D(latitude: 2, longitude: 2)), distance: 100.0, driverId: "driver456", autoAssignedDriver: true)
         try await tripService.updateTripDriver(tripToUpdate: tripToUpdate, test: true)
         
         // Then
@@ -100,6 +100,7 @@ class TripServiceTests: XCTestCase {
         XCTAssertEqual(snapshot.count, 1)
         XCTAssertEqual(snapshot.documents.first!.documentID, docRef.documentID)
         XCTAssertEqual(snapshot.documents.first!["driverId"] as? String ?? "", "driver456")
+        XCTAssertEqual(snapshot.documents.first!["autoAssignedDriver"] as? Bool ?? false, true)
         
         // Clean
         try await firestore.collection("tripsTest").document(docRef.documentID).delete()
@@ -111,7 +112,7 @@ class TripServiceTests: XCTestCase {
         // Given
         let startCoordinates = GeoPoint(latitude: 1, longitude: 1)
         let endCoordinates = GeoPoint(latitude: 2, longitude: 2)
-        let docRef = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 100.0, "originalTimeZone": "GMT+2"])
+        let docRef = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 100.0, "originalTimeZone": "GMT+2", "autoAssignedDriver" : false])
         let givenTrip = try await firestore.collection("tripsTest").document(docRef.documentID).getDocument()
         XCTAssertTrue(givenTrip.exists)
         
@@ -127,12 +128,12 @@ class TripServiceTests: XCTestCase {
         // Given
         let startCoordinates = GeoPoint(latitude: 1, longitude: 1)
         let endCoordinates = GeoPoint(latitude: 2, longitude: 2)
-        let docRef1 = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 100.0, "originalTimeZone": "GMT+2"])
-        let docRef2 = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha 2", "endAddress": "Brno 2", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 200.0, "originalTimeZone": "GMT+2"])
+        let docRef1 = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha", "endAddress": "Brno", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 100.0, "originalTimeZone": "GMT+2", "autoAssignedDriver" : false])
+        let docRef2 = try await firestore.collection("tripsTest").addDocument(data: ["startAddress": "Praha 2", "endAddress": "Brno 2", "startCoordinates": startCoordinates, "endCoordinates": endCoordinates, "startDateTime": Date(), "endDateTime": Date(), "distance": 200.0, "originalTimeZone": "GMT+2", "autoAssignedDriver" : false])
         
         let trips = [
-            Trip(id: docRef1.documentID, startDateTime: Date(), endDateTime: Date(), originalTimeZone: TimeZone.current, startLocation: Location(address: "Praha", coordinate: CLLocationCoordinate2D(latitude: 1, longitude: 1)), endLocation: Location(address: "Brno", coordinate: CLLocationCoordinate2D(latitude: 2, longitude: 2)), distance: 100.0, driverId: "driver123"),
-            Trip(id: docRef2.documentID, startDateTime: Date(), endDateTime: Date(), originalTimeZone: TimeZone.current, startLocation: Location(address: "Praha 2", coordinate: CLLocationCoordinate2D(latitude: 1, longitude: 1)), endLocation: Location(address: "Brno 2", coordinate: CLLocationCoordinate2D(latitude: 2, longitude: 2)), distance: 200.0, driverId: "driver456")
+            Trip(id: docRef1.documentID, startDateTime: Date(), endDateTime: Date(), originalTimeZone: TimeZone.current, startLocation: Location(address: "Praha", coordinate: CLLocationCoordinate2D(latitude: 1, longitude: 1)), endLocation: Location(address: "Brno", coordinate: CLLocationCoordinate2D(latitude: 2, longitude: 2)), distance: 100.0, driverId: "driver123", autoAssignedDriver: false),
+            Trip(id: docRef2.documentID, startDateTime: Date(), endDateTime: Date(), originalTimeZone: TimeZone.current, startLocation: Location(address: "Praha 2", coordinate: CLLocationCoordinate2D(latitude: 1, longitude: 1)), endLocation: Location(address: "Brno 2", coordinate: CLLocationCoordinate2D(latitude: 2, longitude: 2)), distance: 200.0, driverId: "driver456", autoAssignedDriver: false)
         ]
         
         let givenTrip1 = try await firestore.collection("tripsTest").document(docRef1.documentID).getDocument()

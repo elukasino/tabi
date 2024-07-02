@@ -14,6 +14,7 @@ struct TripsView: View {
     @State var fileImporterPresented = false
     //@State var importingSheetPresented = false
     @State var confirmationDialogPresented = false
+    @State var autoAssignDriverSheetPresented = false
     
     var body: some View {
         NavigationStack {
@@ -24,6 +25,7 @@ struct TripsView: View {
                     } else {
                         ForEach(tripVM.trips) { trip in
                             TripView(trip: trip)
+                                .padding([.horizontal, .top])
                         }
                     }
                 }
@@ -44,6 +46,17 @@ struct TripsView: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        autoAssignDriverSheetPresented = true
+                    } label: {
+                        Image(systemName: "wand.and.stars")
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.primary, .teal)
+                    }
+                }
+            }
+            .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     if tripVM.isLoading {
                         ProgressView()
@@ -54,14 +67,6 @@ struct TripsView: View {
                         } label: {
                             Image(systemName: "trash")
                         }
-                        .confirmationDialog("Do you want to delete all trips?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
-                            Button("Delete all", role: .destructive) {
-                                Task {
-                                    await tripVM.deleteAllTrips()
-                                }
-                            }
-                            Button("Cancel", role: .cancel) {}
-                        }
                     }
                 }
             }
@@ -71,6 +76,19 @@ struct TripsView: View {
                     await driverVM.fetchAllDrivers()
                     await tripVM.fetchAllTrips()
                 }
+            }
+            .sheet(isPresented: $autoAssignDriverSheetPresented) {
+                NavigationView {
+                    AutoAssignDriverView()
+                }
+            }
+            .confirmationDialog("Do you want to delete all trips?", isPresented: $confirmationDialogPresented, titleVisibility: .visible) {
+                Button("Delete all", role: .destructive) {
+                    Task {
+                        await tripVM.deleteAllTrips()
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
             }
             .alert(isPresented: $tripVM.errorOccurred) {
                 Alert(title: Text("Error"), message: Text(tripVM.errorMessage ?? "Unknown error"), dismissButton: .default(Text("OK")))
